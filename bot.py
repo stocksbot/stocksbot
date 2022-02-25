@@ -5,8 +5,6 @@ from nextcord.ext import commands
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from config import COMMAND_PREFIX
-
 
 class BotCore(commands.AutoShardedBot):
 

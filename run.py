@@ -5,6 +5,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from config import *
 from bot import BotCore
 
+from config import COMMAND_PREFIX
+
 from objects import base
 
 
@@ -57,8 +59,25 @@ def main():
     bot = BotCore(command_prefix=COMMAND_PREFIX)
     bot.remove_command("help") # Overwrite default help command
 
+    # We need to preload the objects to add them to
+    # possible migrations
+    for OBJECT_NAME in ACTIVE_OBJECTS:
+        k = importlib.import_module(OBJECT_NAME)
+
     # Create all tables if they do not exist
     base.Base.metadata.create_all(bot.engine)
+
+    # Seed active seeders
+    for SEEDER in ACTIVE_SEEDERS:
+        k = importlib.import_module(SEEDER)
+        s = getattr(k, "seed")
+        s(bot.db_session)
+    
+    # Add our cogs in ACTIVE_COGS (see config)
+    logging.info("Loading cogs...")
+    for cog in ACTIVE_COGS:
+        logging.info(" -- Loading '{}'".format(cog))
+        bot.load_extension(cog)
 
     # Run our bot with token
     bot.run(DISCORD_TOKEN)
