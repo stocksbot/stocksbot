@@ -1,4 +1,5 @@
 from __future__ import annotations
+from binascii import Incomplete
 
 from datetime import datetime
 import logging
@@ -14,6 +15,7 @@ class EconomyAccount(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(BigInteger, unique=True)
     balance = Column(BigInteger)
+    income = Column(BigInteger)
     enabled = Column(Boolean)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
@@ -43,6 +45,7 @@ class EconomyAccount(Base):
         new_account = EconomyAccount(
             user_id = user_id,
             balance = 100000,
+            income = 20000,
             enabled = enabled,
         )
         session.add(new_account)
@@ -57,3 +60,11 @@ class EconomyAccount(Base):
 
     def get_balance(self):
         return self.balance / 10000 # Convert to database-friendly format
+
+    def get_income(self):
+        return self.income / 10000 # Convert to database-friendly format
+
+    def dispense_income(self, session): #TODO add daily restriction
+        self.balance += self.income
+        session.commit()
+        return self.balance
