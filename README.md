@@ -23,3 +23,7 @@ $ pip install -r requirements.txt
 ```bash
 $ python3 run.py
 ```
+
+## Local Testing
+
+Refer to the following [guide](https://nextcord.readthedocs.io/en/stable/discord.html) for setting up your own instance.
