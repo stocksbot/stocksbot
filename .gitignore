@@ -1,1 +1,4 @@
 .venv
+*.db
+secrets.json
+__pycache__
