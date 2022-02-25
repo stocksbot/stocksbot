@@ -10,9 +10,11 @@ LOGGING_FORMAT = "(%(asctime)s) [%(levelname)s] - %(message)s"
 # Cogs in use
 ACTIVE_COGS = [
     "cogs.core",
+    "cogs.economy",
 ]
 
 ACTIVE_OBJECTS = [
+    "objects.economy.account",
 ]
 
 ACTIVE_SEEDERS = [

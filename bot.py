@@ -15,7 +15,7 @@ class BotCore(commands.AutoShardedBot):
 
     async def on_ready(self):
         logging.info("Logged on as [{}]".format(self.user))
-        logging.info("Using discord.py version {}".format(nextcord.__version__))
+        logging.info("Using nextcord version {}".format(nextcord.__version__))
 
     async def on_message(self, message):
         logging.debug("Message from {0.author}: {0.content}".format(message))

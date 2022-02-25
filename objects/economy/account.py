@@ -8,7 +8,7 @@ from sqlalchemy import Column, Boolean, Integer, BigInteger, DateTime
 from objects.base import Base
 
 
-class PlayerAccount(Base):
+class EconomyAccount(Base):
     __tablename__ = 'economy_accounts'
 
     id = Column(Integer, primary_key=True)
@@ -23,24 +23,24 @@ class PlayerAccount(Base):
 
     @staticmethod
     def get_all_economy_accounts(session):
-        return session.query(PlayerAccount).all()
+        return session.query(EconomyAccount).all()
 
     @staticmethod
     def get_top_economy_accounts(session, number=20):
-        return session.query(PlayerAccount).order_by(PlayerAccount.balance.desc()).all()[:number]
+        return session.query(EconomyAccount).order_by(EconomyAccount.balance.desc()).all()[:number]
 
     @staticmethod
-    def get_economy_account(user, session, create_if_not_exists=True) -> PlayerAccount:
+    def get_economy_account(user, session, create_if_not_exists=True) -> EconomyAccount:
         user_id = user.id
-        result = session.query(PlayerAccount).filter_by(user_id=user_id).first()
+        result = session.query(EconomyAccount).filter_by(user_id=user_id).first()
         if result is None and create_if_not_exists:
-            return PlayerAccount.create_economy_account(user, session, not user.bot)
+            return EconomyAccount.create_economy_account(user, session, not user.bot)
         return result
 
     @staticmethod
     def create_economy_account(user, session, enabled, commit_on_execution=True):
         user_id = user.id
-        new_account = PlayerAccount(
+        new_account = EconomyAccount(
             user_id = user_id,
             balance = 100000,
             enabled = enabled,
