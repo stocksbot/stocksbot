@@ -4,7 +4,7 @@ import nextcord
 from nextcord.ext import commands
 
 from messages.economy import *
-from messages.income import CMD_CLAIM, CMD_INCOME
+from messages.income import CMD_CLAIM, CMD_CLAIMFAIL, CMD_INCOME
 from objects.economy.account import EconomyAccount
 
 
@@ -25,8 +25,11 @@ class Income(commands.Cog):
     async def claimincome(self, ctx):
         """Dispenses income to author's account"""
         account = EconomyAccount.get_economy_account(ctx.author, self.bot.db_session)
-        account.dispense_income(self.bot.db_session)
-        await ctx.send(CMD_CLAIM.format(ctx.author, account.get_income(), account.get_balance()))
+        status = account.dispense_income(self.bot.db_session)
+        if(status == 0):
+            await ctx.send(CMD_CLAIM.format(ctx.author, account.get_income(), account.get_balance()))
+        else:
+            await ctx.send(CMD_CLAIMFAIL)
 
 
 def setup(bot):
