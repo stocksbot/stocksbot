@@ -17,7 +17,7 @@ class EconomyAccount(Base):
     balance = Column(BigInteger)
     income = Column(BigInteger)
     enabled = Column(Boolean)
-    claimavailable = Column(Boolean)
+    lastclaim = Column(DateTime)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
@@ -48,7 +48,7 @@ class EconomyAccount(Base):
             balance = 100000,
             income = 20000,
             enabled = enabled,
-            claimavailable = True,
+            lastclaim = None,
         )
         session.add(new_account)
         if commit_on_execution:
@@ -67,9 +67,16 @@ class EconomyAccount(Base):
         return self.income / 10000 # Convert to database-friendly format
 
     def dispense_income(self, session):
-        if(self.claimavailable):
+        if(self.lastclaim == None):
+            self.lastclaim = datetime.now()
             self.balance += self.income
             self.claimavailable = False
+            session.commit()
+            return 0
+        timediff = self.lastclaim - datetime.now()
+        if(timediff.days>=1):
+            self.balance += self.income
+            self.lastclaim = datetime.now()
             session.commit()
             return 0
         else:

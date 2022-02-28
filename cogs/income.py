@@ -2,9 +2,10 @@ import logging
 
 import nextcord
 from nextcord.ext import commands
+from datetime import datetime, timedelta
 
 from messages.economy import *
-from messages.income import CMD_CLAIM, CMD_CLAIMFAIL, CMD_INCOME
+from messages.income import CMD_CLAIM, CMD_CLAIMFAILHOURS, CMD_CLAIMFAILMINUTES, CMD_INCOME
 from objects.economy.account import EconomyAccount
 
 
@@ -29,7 +30,14 @@ class Income(commands.Cog):
         if(status == 0):
             await ctx.send(CMD_CLAIM.format(ctx.author, account.get_income(), account.get_balance()))
         else:
-            await ctx.send(CMD_CLAIMFAIL)
+            nextready = account.lastclaim + timedelta(days=1)
+            timediff = nextready - datetime.now()
+            hours = timediff.seconds//3600
+            minutes = (timediff.seconds//60)%60
+            if(hours >= 1):
+                await ctx.send(CMD_CLAIMFAILHOURS.format(hours,minutes))
+            else:
+                await ctx.send(CMD_CLAIMFAILMINUTES.format(minutes))
 
 
 def setup(bot):
