@@ -16,8 +16,12 @@ class Economy(commands.Cog):
         """Returns target account's balance."""
         if target is None:
             target = ctx.author
+
         # Get current economy account
-        account = EconomyAccount.get_economy_account(target, self.bot.db_session)
+        account = EconomyAccount.get_economy_account(
+            target,
+            self.bot.db_session
+        )
         await ctx.send(CMD_BAL.format(target, account.get_balance()))
 
     @commands.command()
@@ -26,14 +30,29 @@ class Economy(commands.Cog):
         """(Owner) Gives all users in guild economy accounts."""
         registered = 0
         for member in ctx.guild.members:
-            k = EconomyAccount.get_economy_account(member, self.bot.db_session, create_if_not_exists=False)
+
+            # Avoid account creation for bots
+            if member.bot:
+                continue
+
+            # Check if user exists, else create
+            k = EconomyAccount.get_economy_account(
+                member,
+                self.bot.db_session,
+                create_if_not_exists=False
+            )
+
             if k is None:
                 k = EconomyAccount.create_economy_account(
                     member, self.bot.db_session,
                     member.bot or member.system, commit_on_execution=False
                 )
                 registered += 1
+
+        # Commit to DB
         self.bot.db_session.commit()
+
+        # Logs
         logging.info("Registered {0} new accounts in the Economy database.".format(registered))
 
 
