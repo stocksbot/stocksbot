@@ -83,6 +83,6 @@ class EconomyAccount(Base):
             return 1
 
     def resetincomeclaim(self, session):
-        self.claimavailable = True
+        self.lastclaim = None
         session.commit()
         return
