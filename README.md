@@ -1,10 +1,13 @@
 # Stocks Bot
 This is a course requirements for CS191/192 Software Engineering Courses of the Department of Computer Science, College of Engineering, University of the Philippines, Diliman under the guidance of Ma. Rowena C. Solamo for AY 2020-2021.
 
-Joshua Doros
-Glenn Walter Lim
-Ishben Santos
-Derick Wells
+Doros, Joshua
+
+Lim, Glenn Walter
+
+Santos, Ishben
+
+Wells, Derick
 
 Created using [Shalltear boilerplate](https://github.com/lickorice/shalltear). Migrated from Discord.py to Nextcord.
 
