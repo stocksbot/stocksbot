@@ -13,7 +13,7 @@ class Economy(commands.Cog):
 
     @commands.command()
     async def bal(self, ctx, target: nextcord.Member=None):
-        """Returns target account's balance."""
+        """Returns your account balance."""
         if target is None:
             target = ctx.author
 
