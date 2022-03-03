@@ -57,6 +57,29 @@ class Economy(commands.Cog):
 
         # Logs
         logging.info("Registered {0} new accounts in the Economy database.".format(registered))
+    
+    @commands.command()
+    @commands.is_owner()
+    async def removeplayer(self, ctx, target: nextcord.Member):
+        """Returns target account's balance."""
+        if target is None:
+            await ctx.send("No account found.")
+
+        # Find targeted account
+        account = EconomyAccount.delete_economy_account(
+            target,
+            self.bot.db_session
+        )
+
+        # Commit to DB
+        self.bot.db_session.commit()
+
+        # Logs
+        logging.info("Deleted account {0}".format(target))
+
+        await ctx.send(
+            CMD_REMOVE_PLAYER.format(target)
+        )
 
 
 def setup(bot):

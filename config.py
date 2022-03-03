@@ -11,6 +11,7 @@ LOGGING_FORMAT = "(%(asctime)s) [%(levelname)s] - %(message)s"
 ACTIVE_COGS = [
     "cogs.core",
     "cogs.economy",
+    "cogs.income",
 ]
 
 ACTIVE_OBJECTS = [

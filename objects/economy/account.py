@@ -1,4 +1,5 @@
 from __future__ import annotations
+from binascii import Incomplete
 
 from datetime import datetime
 import logging
@@ -15,7 +16,9 @@ class EconomyAccount(Base):
     user_id = Column(BigInteger)            # Discord user id
     guild_id = Column(BigInteger)           # Discord server id
     balance = Column(BigInteger)
-    enabled = Column(Boolean)               # Disable economy accoutns
+    income = Column(BigInteger)
+    enabled = Column(Boolean)
+    lastclaim = Column(DateTime)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
@@ -56,7 +59,9 @@ class EconomyAccount(Base):
             user_id = user_id,
             guild_id = guild_id,
             balance = 100000,
+            income = 20000,
             enabled = enabled,
+            lastclaim = None,
         )
 
         # Commit new account to DB
@@ -65,6 +70,21 @@ class EconomyAccount(Base):
             session.commit()
 
         return new_account
+    
+    @staticmethod
+    def delete_economy_account(member, session) -> EconomyAccount:
+        user_id = member.id
+        guild_id = member.guild.id
+
+        # Search for unique user_id + guild_id combination
+        result = session.query(EconomyAccount).filter(
+            and_(
+                EconomyAccount.user_id == user_id,
+                EconomyAccount.guild_id == guild_id
+            )
+        ).delete()
+
+        return result
 
     def has_balance(self, amount, raw=False):
         if not raw:
@@ -73,3 +93,27 @@ class EconomyAccount(Base):
 
     def get_balance(self):
         return self.balance / 10000 # Convert to database-friendly format
+
+    def get_income(self):
+        return self.income / 10000 # Convert to database-friendly format
+
+    def dispense_income(self, session):
+        if(self.lastclaim == None):
+            self.lastclaim = datetime.now()
+            self.balance += self.income
+            self.claimavailable = False
+            session.commit()
+            return 0
+        timediff = datetime.now() - self.lastclaim
+        if(timediff.days>=1):
+            self.balance += self.income
+            self.lastclaim = datetime.now()
+            session.commit()
+            return 0
+        else:
+            return 1
+
+    def resetincomeclaim(self, session):
+        self.lastclaim = None
+        session.commit()
+        return
