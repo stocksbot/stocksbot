@@ -89,7 +89,7 @@ class EconomyAccount(Base):
             self.claimavailable = False
             session.commit()
             return 0
-        timediff = self.lastclaim - datetime.now()
+        timediff = datetime.now() - self.lastclaim
         if(timediff.days>=1):
             self.balance += self.income
             self.lastclaim = datetime.now()
