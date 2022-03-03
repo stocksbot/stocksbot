@@ -16,14 +16,18 @@ class Core(commands.Cog):
 
     @commands.command()
     async def ping(self, ctx):
-        """Tests responsiveness."""
+        """Tests responsiveness.
+        
+        Example Usage: s!ping"""
         latency_in_ms = "{} ms".format(int(self.bot.latency * 1000))
         await ctx.send(CMD_PING.format(latency_in_ms))
 
     
     @commands.command()
     async def help(self, ctx, command=None):
-        """Shows all the features the bot is able to do."""
+        """Shows all the features the bot is able to do.
+        
+        Example Usage: s!help"""
         all_commands = [cmd for cmd in self.bot.commands]
         if command == None:
             embed = nextcord.Embed(title="Commands for Stocks Bot", color=0xff1155)
