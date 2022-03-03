@@ -12,10 +12,11 @@ class Economy(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def bal(self, ctx, target: nextcord.Member=None):
-        """Returns your account balance."""
-        if target is None:
-            target = ctx.author
+    async def bal(self, ctx):
+        """Returns your account balance.
+        
+        Example Usage: s!bal"""
+        target = ctx.author
 
         # Get current economy account
         account = EconomyAccount.get_economy_account(
@@ -27,7 +28,9 @@ class Economy(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def registerall(self, ctx):
-        """(Owner) Gives all users in guild economy accounts."""
+        """(Owner) Gives all users in guild economy accounts.
+        
+        Example Usage: s!registerall"""
         registered = 0
         for member in ctx.guild.members:
 
