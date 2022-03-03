@@ -70,6 +70,21 @@ class EconomyAccount(Base):
             session.commit()
 
         return new_account
+    
+    @staticmethod
+    def delete_economy_account(member, session) -> EconomyAccount:
+        user_id = member.id
+        guild_id = member.guild.id
+
+        # Search for unique user_id + guild_id combination
+        result = session.query(EconomyAccount).filter(
+            and_(
+                EconomyAccount.user_id == user_id,
+                EconomyAccount.guild_id == guild_id
+            )
+        ).delete()
+
+        return result
 
     def has_balance(self, amount, raw=False):
         if not raw:
