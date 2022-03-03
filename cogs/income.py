@@ -15,7 +15,9 @@ class Income(commands.Cog):
 
     @commands.command()
     async def showincome(self, ctx, target: nextcord.Member=None):
-        """Returns target account's income."""
+        """Shows your regular income.
+        
+        Example Usage: s!showincome"""
         if target is None:
             target = ctx.author
         # Get current economy account
@@ -24,7 +26,9 @@ class Income(commands.Cog):
 
     @commands.command()
     async def claimincome(self, ctx):
-        """Dispenses income to author's account"""
+        """Dispenses income to your account.
+        
+        Example Usage: s!claimincome"""
         account = EconomyAccount.get_economy_account(ctx.author, self.bot.db_session)
         status = account.dispense_income(self.bot.db_session)
         if(status == 0):

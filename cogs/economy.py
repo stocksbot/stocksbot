@@ -13,7 +13,7 @@ class Economy(commands.Cog):
 
     @commands.command()
     async def bal(self, ctx):
-        """Returns your account balance.
+        """Shows your account balance.
         
         Example Usage: s!bal"""
         target = ctx.author
@@ -61,7 +61,10 @@ class Economy(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def removeplayer(self, ctx, target: nextcord.Member):
-        """Returns target account's balance."""
+        """(Owner) Remove a player from the trading game.
+        Warning: This removes the player's records, including his/her financial assets in the game.
+        
+        Example Usage: s!removeplayer <player_name>"""
         if target is None:
             await ctx.send("No account found.")
 

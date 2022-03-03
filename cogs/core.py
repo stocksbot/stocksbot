@@ -16,7 +16,7 @@ class Core(commands.Cog):
 
     @commands.command()
     async def ping(self, ctx):
-        """Tests responsiveness.
+        """Tests responsiveness of the bot.
         
         Example Usage: s!ping"""
         latency_in_ms = "{} ms".format(int(self.bot.latency * 1000))
