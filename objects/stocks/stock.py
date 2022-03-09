@@ -34,5 +34,32 @@ class Stock(Base):
         return result
 
     @staticmethod
-    def update_stocks(clean_stock_data):
-        pass
+    def update_stocks(clean_stock_data, session):
+        """Update stock prices.
+        We assume stock exists c/o seeder
+        """
+
+        stock_mappings = []
+        for stock in clean_stock_data:
+            target = Stock.get_stock(
+                stock['symbol'],
+                session
+            )
+            stock_mappings.append(
+                {
+                    'id':target.id,
+                    'price': stock['price']
+                }
+            )
+        
+        # To-do: Standardize clean_stock_data as object
+        session.bulk_update_mappings(
+            Stock,
+            stock_mappings
+        )
+
+        session.commit()
+
+        logging.info("Updated {0} stock prices.".format(
+            len(clean_stock_data)
+        ))
