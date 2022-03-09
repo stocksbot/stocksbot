@@ -16,7 +16,21 @@ def create_secrets_file():
     print("Creating new secrets file {}...".format(SECRETS_FILE))
     print("Please enter your Discord bot's token:")
     token = input()
-    secrets_json = {'token': token}
+    
+    # To-do: Automate secrets.json generation for several data sources 
+    print("Please enter your Yahoo Finance API key:")
+    key = input()
+    print("Please enter your Yahoo Finance API endpoint:")
+    endpoint = input()
+
+    secrets_json = {
+        'token': token,
+        'yahoo': {
+            'key': key,
+            'endpoint': endpoint
+        }
+    }
+
     with open(SECRETS_FILE, 'w') as f:
         f.write(json.dumps(secrets_json))
     print("Secrets file {} successfully created.".format(SECRETS_FILE))
