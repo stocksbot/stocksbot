@@ -12,11 +12,17 @@ ACTIVE_COGS = [
     "cogs.core",
     "cogs.economy",
     "cogs.income",
+    "cogs.stocks",
 ]
 
 ACTIVE_OBJECTS = [
     "objects.economy.account",
+    "objects.stocks.stock",
 ]
 
 ACTIVE_SEEDERS = [
+    "objects.seeders.stocks"
 ]
+
+# Data sources stocks
+YAHOO_STOCKS = ["AAPL","MSFT","AMZN","FB","GOOGL","TSLA","NVDA","V"]
