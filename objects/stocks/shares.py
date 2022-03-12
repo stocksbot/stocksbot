@@ -46,6 +46,24 @@ class Shares(Base):
         return new_shareholder
 
     @staticmethod
+    def create_shareholder_with_id(account_id, stock_id, amount, session:Session, commit = True) -> Shares:
+        """Create new row on shares table (but with a stock ID instead of a symbol)"""
+
+        # Initialize new Shares object
+        new_shareholder = Shares(
+            account_id = account_id,
+            stock_id = stock_id,
+            amount_held = amount
+        )
+
+        # Commit new shares object to DB
+        session.add(new_shareholder)
+        if(commit):
+            session.commit()
+
+        return new_shareholder
+
+    @staticmethod
     def get_shares_held(account_id, symbol, session:Session) -> Integer:
         """Return amount of specific shares held by an account"""
 
@@ -65,6 +83,22 @@ class Shares(Base):
 
         result = session.query(Shares).filter(Shares.account_id == account_id)
         return result
+
+    @staticmethod
+    def increment_shares(account_id, stock_id, amount, session:Session, commit = True):
+        """Increment shares held by account on a specific stock"""
+
+        shareQuery = session.query(Shares).filter(
+            Shares.account_id == account_id, 
+            Shares.stock_id == stock_id
+        ).first()
+        if(shareQuery == None):
+            shareQuery = Shares.create_shareholder_with_id(account_id,stock_id,amount,session,commit)
+        else:
+            shareQuery.amount_held += amount
+        if(commit):
+            session.commit()
+        return shareQuery
 
     @staticmethod
     def buy_shares(account_id, symbol, buy_quantity, buy_price, session:Session):

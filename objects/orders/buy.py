@@ -3,7 +3,6 @@ from binascii import Incomplete
 
 from datetime import datetime
 import logging
-import typing as ty
 
 from discord import ButtonStyle
 
@@ -17,7 +16,7 @@ from objects.base import Base
 
 
 class BuyOrder(Base):
-    __tablename__ = 'BuyOrder'
+    __tablename__ = 'buyorder'
 
     id = Column(Integer, primary_key = True)
     account_id = Column(Integer, ForeignKey('economy_accounts.id'))
@@ -50,8 +49,25 @@ class BuyOrder(Base):
         return new_buyorder
 
     @staticmethod
-    def check_buyorders(session:Session):
-        """Returns list of executable buyorders"""
+    def delete_buyorder(id, session:Session, commit = True):
+        """Delete a buyorder row"""
+
+        Session.query(BuyOrder).filter(BuyOrder.id == id).delete()
+        if(commit):
+            session.commit()
+
+    @staticmethod
+    def checkex_buyorders(session:Session):
+        """Checks and executes candidate buyorders"""
         BuyOrders = session.query(BuyOrder).all()
         for order in BuyOrders:
-            stock = session.query(Stock).filter(Stock.id == order.stock_id)
+            stock = session.query(Stock).filter(Stock.id == order.stock_id).first()
+            currentprice = stock.price
+            if(currentprice <= order.buy_price):
+                econaccount = session.query(EconomyAccount).filter(EconomyAccount.id == order.account_id).first()
+                Shares.increment_shares(order.account_id, order.stock_id, order.buy_quantity, session, False)
+                econaccount.balance += order.buy_quantity*(order.buy_price-currentprice) #refund reserved balance
+                BuyOrder.delete_buyorder(order.id,session,False)
+                session.commit()
+
+                
