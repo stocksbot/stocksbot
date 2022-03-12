@@ -13,16 +13,23 @@ class Economy(commands.Cog):
 
     @commands.command()
     async def bal(self, ctx, target: nextcord.Member=None):
-        """Returns target account's balance."""
+        """Shows target account's balance. If target account is not specified, the bot shows your balance instead.
+        
+        Example Usage: s!bal <player_name>"""
         if target is None:
             target = ctx.author
 
+        # Avoid inquiring balance of bots / Prevent bot account creation
+        if target.bot:
+            await ctx.send("Cannot inquire for bot's balance.")
+            
         # Get current economy account
-        account = EconomyAccount.get_economy_account(
-            target,
-            self.bot.db_session
-        )
-        await ctx.send(CMD_BAL.format(target, account.get_balance()))
+        else:
+            account = EconomyAccount.get_economy_account(
+                target,
+                self.bot.db_session
+            )
+            await ctx.send(CMD_BAL.format(target, account.get_balance()))
 
     @commands.command()
     @commands.is_owner()
