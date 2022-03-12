@@ -58,25 +58,42 @@ class Economy(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def removeplayer(self, ctx, target: nextcord.Member):
-        """Returns target account's balance."""
+        """Removes a player from the game.
+        Note: Removing a player deletes the player's account data including all of his assets. Proceed with caution.
+        
+        Example Usage: s!removeplayer <player_name>"""
         if target is None:
             await ctx.send("No account found.")
 
-        # Find targeted account
-        account = EconomyAccount.delete_economy_account(
+        # Check if account targeted exists
+        account_checked = EconomyAccount.get_economy_account(
             target,
-            self.bot.db_session
+            self.bot.db_session,
+            False
         )
 
-        # Commit to DB
-        self.bot.db_session.commit()
+        # Delete targeted account (if it exists)
 
-        # Logs
-        logging.info("Deleted account {0}".format(target))
+        if account_checked is None:
+            await ctx.send("Account is not registered or does not exist.")
+        
+        else:
+            account_deleted = EconomyAccount.delete_economy_account(
+                target,
+                self.bot.db_session
+            )
 
-        await ctx.send(
-            CMD_REMOVE_PLAYER.format(target)
-        )
+            await ctx.send(
+                CMD_REMOVE_PLAYER.format(target)
+            )
+
+            # Commit to DB
+            self.bot.db_session.commit()
+
+            # Logs
+            logging.info("Deleted account {0}".format(target))
+
+        
 
 
 def setup(bot):
