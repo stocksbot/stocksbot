@@ -13,9 +13,9 @@ class Economy(commands.Cog):
 
     @commands.command()
     async def bal(self, ctx, target: nextcord.Member=None):
-        """Shows target account's balance. If target account is not specified, the bot shows your balance instead.
-        
-        Example Usage: s!bal <player_name>"""
+        """Shows target account's balance. If target account is not yet registered, applying this command will automatically register the account.
+        If target account is not specified, the bot shows your balance instead.
+        """
         if target is None:
             target = ctx.author
 
@@ -67,8 +67,7 @@ class Economy(commands.Cog):
     async def removeplayer(self, ctx, target: nextcord.Member):
         """Removes a player from the game.
         Note: Removing a player deletes the player's account data including all of his assets. Proceed with caution.
-        
-        Example Usage: s!removeplayer <player_name>"""
+        """
         if target is None:
             await ctx.send("No account found.")
 
@@ -99,6 +98,8 @@ class Economy(commands.Cog):
 
             # Logs
             logging.info("Deleted account {0}".format(target))
+
+
 
         
 
