@@ -68,10 +68,11 @@ class YahooFetcher():
 
         tickers = self.raw_data['quoteResponse']['result']
         for t in tickers:
+            truncated_price = int(t['ask'] * 10000)
             stock = {
                 'name': t['shortName'],
                 'symbol': t['symbol'],
-                'price': float(t['ask']),
+                'price': truncated_price,
             }
             self.clean_data.append(stock)
 

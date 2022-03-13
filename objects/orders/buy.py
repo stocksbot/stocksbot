@@ -56,6 +56,3 @@ class BuyOrder(Base):
         Session.query(BuyOrder).filter(BuyOrder.id == id).delete()
         if(commit):
             session.commit()
-
-
-                
