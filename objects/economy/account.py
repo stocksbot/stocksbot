@@ -117,3 +117,8 @@ class EconomyAccount(Base):
         self.lastclaim = None
         session.commit()
         return
+
+    def updateincome(self, session, newincome):
+        self.income = int(newincome*10000)
+        session.commit()
+        return
