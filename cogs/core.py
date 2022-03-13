@@ -35,7 +35,8 @@ class Core(commands.Cog):
 
                 commands_for_cog = [f'`{c.name}`' for c in all_commands if not c.hidden and c.cog_name == cog]
                 s = ' '.join(commands_for_cog)
-                embed.add_field(name=cog, inline=False, value=s)
+                if s:
+                    embed.add_field(name=cog, inline=False, value=s)
             await ctx.send("Do `s!help <command>` for more information.")
         else:
             if command not in [c.name for c in all_commands]:
