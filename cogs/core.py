@@ -4,25 +4,25 @@ from time import time
 
 import nextcord
 from nextcord.ext import commands
-
+from bot import BotCore
 from messages.core import *
 
 start_time = time()
 
 
 class Core(commands.Cog):
-    def  __init__(self, bot):
+    def  __init__(self, bot:BotCore):
         self.bot = bot
 
     @commands.command()
-    async def ping(self, ctx):
+    async def ping(self, ctx:commands.Context):
         """Tests responsiveness."""
         latency_in_ms = "{} ms".format(int(self.bot.latency * 1000))
         await ctx.send(CMD_PING.format(latency_in_ms))
 
     
     @commands.command()
-    async def help(self, ctx, command=None):
+    async def help(self, ctx:commands.Context, command=None):
         """Shows all the features the bot is able to do."""
         all_commands = [cmd for cmd in self.bot.commands]
         if command == None:
@@ -54,5 +54,5 @@ class Core(commands.Cog):
         await ctx.send(embed=embed)
 
 
-def setup(bot):
+def setup(bot:BotCore):
     bot.add_cog(Core(bot))

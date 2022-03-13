@@ -5,12 +5,14 @@ from nextcord.ext import commands, tasks
 from objects.stocks.stock import Stock
 
 from fetch.yahoo import YahooFetcher
+from objects.orders.buy import BuyOrder
+from bot import BotCore
 
 fetcher = YahooFetcher()
 
 
 class StocksManager(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot:BotCore):
         self.bot = bot
         self.update_stock_prices.start()
 
@@ -26,7 +28,9 @@ class StocksManager(commands.Cog):
             fetcher.clean_data, 
             self.bot.db_session
         )
+        #Check Buy Orders
+        BuyOrder.checkex_buyorders(self.bot.db_session)
 
 
-def setup(bot):
+def setup(bot:BotCore):
     bot.add_cog(StocksManager(bot))

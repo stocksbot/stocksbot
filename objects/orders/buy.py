@@ -9,7 +9,7 @@ from discord import ButtonStyle
 from objects.stocks.stock import Stock
 from objects.stocks.shares import Shares
 from objects.economy.account import EconomyAccount
-from sqlalchemy import Column, ForeignKey, Integer, Float, DateTime, String, or_
+from sqlalchemy import Column, ForeignKey, Integer, BigInteger, Float, DateTime, String, or_
 from sqlalchemy.orm import Session
 
 from objects.base import Base
@@ -19,9 +19,9 @@ class BuyOrder(Base):
     __tablename__ = 'buyorder'
 
     id = Column(Integer, primary_key = True)
-    account_id = Column(Integer, ForeignKey('economy_accounts.id'))
-    stock_id = Column(stock_id = Column(String(20), ForeignKey('stocks.id')))
-    buy_price = Column(Integer)
+    account_id = Column(BigInteger, ForeignKey('economy_accounts.id'))
+    stock_id = Column(Integer, ForeignKey('stocks.id'))
+    buy_price = Column(BigInteger)
     buy_quantity = Column(Integer)
 
     created_at = Column(DateTime, default=datetime.now)
@@ -62,11 +62,16 @@ class BuyOrder(Base):
         BuyOrders = session.query(BuyOrder).all()
         for order in BuyOrders:
             stock = session.query(Stock).filter(Stock.id == order.stock_id).first()
+            if(stock == None):
+                logging.error("[ERROR] Stock does not exist")
+                continue
             currentprice = stock.price
             if(currentprice <= order.buy_price):
                 econaccount = session.query(EconomyAccount).filter(EconomyAccount.id == order.account_id).first()
+                if(econaccount == None):
+                    continue
                 Shares.increment_shares(order.account_id, order.stock_id, order.buy_quantity, session, False)
-                econaccount.balance += order.buy_quantity*(order.buy_price-currentprice) #refund reserved balance
+                econaccount.balance += order.buy_quantity*(order.buy_price - currentprice) #refund reserved balance, IGNORE THIS
                 BuyOrder.delete_buyorder(order.id,session,False)
                 session.commit()
 

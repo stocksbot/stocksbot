@@ -2,6 +2,7 @@ from __future__ import annotations
 from binascii import Incomplete
 
 from datetime import datetime
+from typing import Optional
 import logging
 
 from objects.stocks.stock import Stock
@@ -27,10 +28,15 @@ class Shares(Base):
         return "<Account ID={0.accountid}, Stock ID={0.stock_id}, Amount={0.amountheld}>".format(self)
 
     @staticmethod
-    def create_shareholder(account_id, symbol, amount, session:Session) -> Shares:
-        """Create new row on shares table"""
+    def create_shareholder(account_id, symbol, amount, session:Session) -> Optional[Shares]:
+        """Create new row on shares table returns shareholder object on success, else returns none"""
+
         # Get stock id
-        stock_id = Stock.get_stock(symbol, session).id
+        stock = Stock.get_stock(symbol, session)
+        if(stock == None):
+            logging.error("[ERROR] stock does not exist")
+            return None
+        stock_id = stock.id        
 
         # Initialize new Shares object
         new_shareholder = Shares(
@@ -64,11 +70,15 @@ class Shares(Base):
         return new_shareholder
 
     @staticmethod
-    def get_shares_held(account_id, symbol, session:Session) -> Integer:
+    def get_shares_held(account_id, symbol, session:Session) -> int:
         """Return amount of specific shares held by an account"""
 
         # Get stock id
-        stock_id = Stock.get_stock(symbol, session).id
+        stock = Stock.get_stock(symbol, session)
+        if(stock == None):
+            logging.error("[ERROR] stock does not exist")
+            return -1
+        stock_id = stock.id
         result = session.query(Shares).filter(
             Shares.stock_id == stock_id, 
             Shares.account_id == account_id
@@ -106,18 +116,22 @@ class Shares(Base):
 
         #Check if account balance can do order
         econaccount = session.query(EconomyAccount).filter(EconomyAccount.id == account_id).first()
-        if(buy_quantity * buy_price > econaccount.balance):
-            # Account does not have enough balance to place such buy order
+        if(econaccount == None):
+            logging.error("[ERROR] Account does not exist")
+            # Account does not exist
             return 1
+        if(buy_quantity * buy_price > econaccount.get_balance):
+            # Account does not have enough balance to place such buy order
+            return 2
         stockobject = Stock.get_stock(symbol, session)
         if(stockobject == None):
             # Stock does not exist
-            return 2
+            return 3
         currentprice = stockobject.price # store price to avoid race conditions
         if(currentprice <= buy_price):
             # Do an instant buy order
             econaccount.balance -= buy_quantity*currentprice
-            stock_id = Stock.get_stock(symbol, session).id
+            stock_id = stockobject.id
             shareQuery = session.query(Shares).filter(
             Shares.stock_id == stock_id, Shares.account_id == account_id
             ).first()

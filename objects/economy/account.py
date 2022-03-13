@@ -3,8 +3,10 @@ from binascii import Incomplete
 
 from datetime import datetime
 import logging
+import typing as ty
 
-from sqlalchemy import Column, Boolean, Integer, BigInteger, DateTime, UniqueConstraint, and_
+from sqlalchemy import Column, Boolean, Float, Integer, BigInteger, DateTime, UniqueConstraint, and_
+from sqlalchemy.orm import Session
 
 from objects.base import Base
 
@@ -31,7 +33,7 @@ class EconomyAccount(Base):
         return "<User id={0.id}, enabled={0.enabled}, balance={0.balance}>".format(self)
 
     @staticmethod
-    def get_economy_account(member, session, create_if_not_exists=True) -> EconomyAccount:
+    def get_economy_account(member, session:Session, create_if_not_exists=True) -> ty.Optional[EconomyAccount]:
         user_id = member.id
         guild_id = member.guild.id
 
@@ -96,6 +98,9 @@ class EconomyAccount(Base):
 
     def get_income(self):
         return self.income / 10000 # Convert to database-friendly format
+
+    def increasebalance(self,amount:float):
+        self.balance += round(amount*10000)
 
     def dispense_income(self, session):
         if(self.lastclaim == None):

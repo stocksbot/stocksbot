@@ -1,3 +1,5 @@
+from decimal import Context
+from typing import Union
 import logging
 
 import nextcord
@@ -7,31 +9,38 @@ from datetime import datetime, timedelta
 from messages.economy import *
 from messages.income import CMD_CLAIM, CMD_CLAIMFAILHOURS, CMD_CLAIMFAILMINUTES, CMD_INCOME, CMD_SUCCESS_UPDATEINCOME
 from objects.economy.account import EconomyAccount
+from bot import BotCore
 
 
 class Income(commands.Cog):
-    def  __init__(self, bot):
+    def  __init__(self, bot:BotCore):
         self.bot = bot
 
     @commands.command()
-    async def showincome(self, ctx, target: nextcord.Member=None):
+    async def showincome(self, ctx:commands.Context, target: Union[nextcord.User, nextcord.Member, None]=None):
         """Returns target account's income."""
         if target is None:
             target = ctx.author
         # Get current economy account
         account = EconomyAccount.get_economy_account(target, self.bot.db_session)
+        if(account == None):
+            await ctx.send(CMD_ACC_MISSING)
+            return
         await ctx.send(CMD_INCOME.format(target, account.get_income()))
 
     @commands.command()
-    async def claimincome(self, ctx):
+    async def claimincome(self, ctx:commands.Context):
         """Dispenses income to author's account"""
         account = EconomyAccount.get_economy_account(ctx.author, self.bot.db_session)
+        if(account == None):
+            await ctx.send(CMD_ACC_MISSING)
+            return
         status = account.dispense_income(self.bot.db_session)
         if(status == 0):
             await ctx.send(CMD_CLAIM.format(ctx.author, account.get_income(), account.get_balance()))
         else:
-            nextready = account.lastclaim + timedelta(days=1)
-            timediff = nextready - datetime.now()
+            nextready = account.lastclaim + timedelta(days=1) # type: ignore
+            timediff = nextready - datetime.now() # type: timedelta
             hours = timediff.seconds//3600
             minutes = (timediff.seconds//60)%60
             if(hours >= 1):
@@ -67,5 +76,5 @@ class Income(commands.Cog):
                 await ctx.send(CMD_SUCCESS_UPDATEINCOME.format(target, newincome))
 
 
-def setup(bot):
+def setup(bot:BotCore):
     bot.add_cog(Income(bot))
