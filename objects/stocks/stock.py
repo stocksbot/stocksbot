@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 from typing import Optional
 
-from sqlalchemy import Column, Integer, Float, DateTime, String, or_
+from sqlalchemy import BigInteger, Column, Integer, Float, DateTime, String, or_
 from sqlalchemy.orm import Session
 
 from objects.base import Base
@@ -17,7 +17,7 @@ class Stock(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(100), unique=True)
     symbol = Column(String(20), unique=True)
-    price = Column(Float)
+    price = Column(BigInteger)
 
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)

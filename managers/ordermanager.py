@@ -6,6 +6,7 @@ from objects.stocks.stock import Stock
 from objects.stocks.shares import Shares
 from objects.orders.buy import BuyOrder
 from sqlalchemy.orm import Session
+from sqlalchemy.types import BigInteger
 
 class OrderManager():
 
@@ -24,6 +25,6 @@ class OrderManager():
                 if(econaccount == None):
                     continue
                 Shares.increment_shares(order.account_id, order.stock_id, order.buy_quantity, session, False)
-                econaccount.balance += order.buy_quantity*(order.buy_price - currentprice) #refund reserved balance, IGNORE THIS
+                econaccount.increasebalance(session,(order.buy_quantity*(order.buy_price - currentprice)), True, False) #refund reserved balance
                 BuyOrder.delete_buyorder(order.id,session,False)
                 session.commit()

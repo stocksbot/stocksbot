@@ -1,4 +1,5 @@
 import logging
+from nextcord import User, Member
 
 import nextcord
 from typing import Union
@@ -14,7 +15,7 @@ class Economy(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def bal(self, ctx:commands.Context, target: Union[nextcord.User, nextcord.Member, None]=None):
+    async def bal(self, ctx:commands.Context, target: Union[User, Member, None]=None):
         """Returns target account's balance."""
         if target is None:
             target = ctx.author
@@ -23,6 +24,10 @@ class Economy(commands.Cog):
         if target.bot:
             await ctx.send("Cannot inquire for bot's balance.")
             
+        if isinstance(target,User):
+            await ctx.send(CMD_NO_GUILD)
+            return
+
         # Get current economy account
         account = EconomyAccount.get_economy_account(
             target,

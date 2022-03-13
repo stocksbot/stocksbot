@@ -1,9 +1,11 @@
 from __future__ import annotations
 from binascii import Incomplete
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
-import typing as ty
+import nextcord
+from nextcord import Member
+from typing import Optional, Union
 
 from sqlalchemy import Column, Boolean, Float, Integer, BigInteger, DateTime, UniqueConstraint, and_
 from sqlalchemy.orm import Session
@@ -33,7 +35,7 @@ class EconomyAccount(Base):
         return "<User id={0.id}, enabled={0.enabled}, balance={0.balance}>".format(self)
 
     @staticmethod
-    def get_economy_account(member, session:Session, create_if_not_exists=True) -> ty.Optional[EconomyAccount]:
+    def get_economy_account(member:Member, session:Session, create_if_not_exists=True) -> Optional[EconomyAccount]:
         user_id = member.id
         guild_id = member.guild.id
 
@@ -51,7 +53,7 @@ class EconomyAccount(Base):
         return result
 
     @staticmethod
-    def create_economy_account(member, session, enabled, commit_on_execution=True):
+    def create_economy_account(member, session:Session, enabled, commit_on_execution=True):
         # Get member's details
         user_id = member.id
         guild_id = member.guild.id
@@ -74,7 +76,7 @@ class EconomyAccount(Base):
         return new_account
     
     @staticmethod
-    def delete_economy_account(member, session) -> EconomyAccount:
+    def delete_economy_account(member, session:Session):
         user_id = member.id
         guild_id = member.guild.id
 
@@ -99,10 +101,16 @@ class EconomyAccount(Base):
     def get_income(self):
         return self.income / 10000 # Convert to database-friendly format
 
-    def increasebalance(self,amount:float):
-        self.balance += round(amount*10000)
+    def increasebalance(self, session:Session, amount, raw=False, commit=True):
+        if(raw):
+            self.balance += amount
+        else:
+            self.balance += round(amount*10000)
+        if(commit):
+            session.commit()
 
-    def dispense_income(self, session):
+    def dispense_income(self, session:Session):
+        """Returns 0 on successful dispense, otherwise returns datetime when claim will be ready again"""
         if(self.lastclaim == None):
             self.lastclaim = datetime.now()
             self.balance += self.income
@@ -116,9 +124,9 @@ class EconomyAccount(Base):
             session.commit()
             return 0
         else:
-            return 1
+            return self.lastclaim + timedelta(days=1)
 
-    def resetincomeclaim(self, session):
+    def resetincomeclaim(self, session:Session):
         self.lastclaim = None
         session.commit()
         return

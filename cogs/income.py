@@ -3,6 +3,7 @@ from typing import Union
 import logging
 
 import nextcord
+from nextcord import User
 from nextcord.ext import commands
 from datetime import datetime, timedelta
 
@@ -22,6 +23,9 @@ class Income(commands.Cog):
         if target is None:
             target = ctx.author
         # Get current economy account
+        if isinstance(target, User):
+            await ctx.send(CMD_NO_GUILD)
+            return
         account = EconomyAccount.get_economy_account(target, self.bot.db_session)
         if(account == None):
             await ctx.send(CMD_ACC_MISSING)
@@ -31,7 +35,11 @@ class Income(commands.Cog):
     @commands.command()
     async def claimincome(self, ctx:commands.Context):
         """Dispenses income to author's account"""
-        account = EconomyAccount.get_economy_account(ctx.author, self.bot.db_session)
+        target = ctx.author
+        if isinstance(target,User):
+            await ctx.send(CMD_NO_GUILD)
+            return
+        account = EconomyAccount.get_economy_account(target, self.bot.db_session)
         if(account == None):
             await ctx.send(CMD_ACC_MISSING)
             return
@@ -39,8 +47,7 @@ class Income(commands.Cog):
         if(status == 0):
             await ctx.send(CMD_CLAIM.format(ctx.author, account.get_income(), account.get_balance()))
         else:
-            nextready = account.lastclaim + timedelta(days=1) # type: ignore
-            timediff = nextready - datetime.now() # type: timedelta
+            timediff = status - datetime.now()
             hours = timediff.seconds//3600
             minutes = (timediff.seconds//60)%60
             if(hours >= 1):
