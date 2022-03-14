@@ -28,6 +28,11 @@ class Core(commands.Cog):
         if command == None:
             embed = nextcord.Embed(title="Commands for Stocks Bot", color=0xff1155)
             for cog in self.bot.cogs:
+
+                # Exclude stocks cogs from help
+                if str(cog) == "StocksManager": 
+                    continue
+
                 commands_for_cog = [f'`{c.name}`' for c in all_commands if not c.hidden and c.cog_name == cog]
                 s = ' '.join(commands_for_cog)
                 embed.add_field(name=cog, inline=False, value=s)
