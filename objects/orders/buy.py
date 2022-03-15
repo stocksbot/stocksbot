@@ -61,8 +61,8 @@ class BuyOrder(Base):
     @staticmethod
     def get_all_buyorders(id, session:Session) -> List[BuyOrder]:
         """Returns all buyorders of a certain account"""
-
-        return Session.query(BuyOrder).filter(BuyOrder.id == id).group_by(BuyOrder.stock_id).order_by(BuyOrder.buy_quantity, BuyOrder.buy_price).all()
+        result = session.query(BuyOrder).filter(BuyOrder.account_id == id).order_by(BuyOrder.stock_id, BuyOrder.buy_quantity, BuyOrder.buy_price).all()
+        return result
     
     @staticmethod
     def get_stock_buyorders(id, stock, session:Session) -> List[BuyOrder]:
@@ -70,5 +70,6 @@ class BuyOrder(Base):
         object = Stock.get_stock(stock, session)
         if(object is None):
             return []
-        return Session.query(BuyOrder).filter(BuyOrder.id == id, BuyOrder.stock_id == object.id).group_by(BuyOrder.stock_id).order_by(BuyOrder.buy_quantity, BuyOrder.buy_price).all()
+        result = session.query(BuyOrder).filter(BuyOrder.account_id == id, BuyOrder.stock_id == object.id).order_by(BuyOrder.buy_price).all()
+        return result
 

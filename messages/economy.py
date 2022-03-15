@@ -7,3 +7,5 @@ CMD_NO_BALANCE = "This account does not have enough balance to do such transacti
 CMD_NO_STOCK = "This stock does not exist"
 CMD_INST_BO = "An instant buy order was successfully executed"
 CMD_PEND_BO = "A pending buy order has successfully been placed"
+CMD_QTY_NP = "Quantity must be greater than 0"
+CMD_PRC_NN = "Price must be non-negative"

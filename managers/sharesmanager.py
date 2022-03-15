@@ -17,16 +17,11 @@ class SharesManagerCodes(Enum):
 
 class SharesManager():
     @staticmethod
-    def buy_shares(account_id, symbol, buy_quantity, buy_price, session:Session):
+    def buy_shares(account:EconomyAccount, symbol: str, buy_quantity: int, buy_price: int, session:Session):
         """Increase owned shares while decreasing corresponding balance"""
 
         #Check if account balance can do order
-        econaccount = session.query(EconomyAccount).filter(EconomyAccount.id == account_id).first()
-        if(econaccount == None):
-            logging.error("[ERROR] Account does not exist")
-            # Account does not exist
-            return SharesManagerCodes.ERR_ACC_DNE
-        if(buy_quantity * buy_price > econaccount.get_balance):
+        if(buy_quantity * buy_price > account.balance):
             # Account does not have enough balance to place such buy order
             return SharesManagerCodes.ERR_BAL_INSF
         stockobject = Stock.get_stock(symbol, session)
@@ -36,20 +31,20 @@ class SharesManager():
         currentprice = stockobject.price # store price to avoid race conditions
         if(currentprice <= buy_price):
             # Do an instant buy order
-            econaccount.balance -= buy_quantity*currentprice
+            account.decreasebalance(session, buy_quantity*currentprice, True, False)
             stock_id = stockobject.id
             shareQuery = session.query(Shares).filter(
-            Shares.stock_id == stock_id, Shares.account_id == account_id
+            Shares.stock_id == stock_id, Shares.account_id == account.id
             ).first()
             if(shareQuery == None):
-                shareQuery = Shares.create_shareholder(account_id, symbol, buy_quantity, session)
+                shareQuery = Shares.create_shareholder(account.id, symbol, buy_quantity, session)
             else:
-                shareQuery.amount_held += buy_quantity
+                shareQuery.increment_shares(account.id,stock_id,buy_quantity,session,False)
             session.commit()
             return SharesManagerCodes.SUCCESS_INSTANT
         else:
             # Do a pending buy order
-            econaccount.balance -= buy_quantity*buy_price # Reserve balance from account for pending buy order
-            BuyOrder.create_buyorder(econaccount.id, stockobject.id, buy_price, buy_quantity, session)
+            account.decreasebalance(session, buy_quantity*currentprice, True, False) # Reserve balance from account for pending buy order
+            BuyOrder.create_buyorder(account.id, stockobject.id, buy_price, buy_quantity, session)
             session.commit()
             return SharesManagerCodes.SUCCESS_PENDING

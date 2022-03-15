@@ -109,6 +109,14 @@ class EconomyAccount(Base):
         if(commit):
             session.commit()
 
+    def decreasebalance(self, session:Session, amount, raw=False, commit=True):
+        if(raw):
+            self.balance -= amount
+        else:
+            self.balance -= round(amount*10000)
+        if(commit):
+            session.commit()
+
     def dispense_income(self, session:Session):
         """Returns 0 on successful dispense, otherwise returns datetime when claim will be ready again"""
         if(self.lastclaim == None):
