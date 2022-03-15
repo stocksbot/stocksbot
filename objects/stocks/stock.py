@@ -37,6 +37,19 @@ class Stock(Base):
         return result
 
     @staticmethod
+    def get_symbol(id, session:Session):
+        """Search for a Stock symbol using Stock.id"""
+
+        result = session.query(Stock).filter(
+            Stock.id == id
+        ).first()
+        if(result == None):
+            logging.warning("[WARNING] Stock symbol does not exist")
+            return None
+        else:
+            return result.symbol
+
+    @staticmethod
     def update_stocks(clean_stock_data, session:Session):
         """Update stock prices.
         We assume stock exists c/o seeder

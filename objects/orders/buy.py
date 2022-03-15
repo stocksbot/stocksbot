@@ -5,6 +5,7 @@ from datetime import datetime
 import logging
 
 from discord import ButtonStyle
+from typing import Optional, List
 
 
 from objects.economy.account import EconomyAccount
@@ -58,8 +59,16 @@ class BuyOrder(Base):
             session.commit()
 
     @staticmethod
-    def get_all_buyorders(id, session:Session):
+    def get_all_buyorders(id, session:Session) -> List[BuyOrder]:
         """Returns all buyorders of a certain account"""
 
-        return Session.query(BuyOrder).filter(BuyOrder.id == id).all()
+        return Session.query(BuyOrder).filter(BuyOrder.id == id).group_by(BuyOrder.stock_id).order_by(BuyOrder.buy_quantity, BuyOrder.buy_price).all()
+    
+    @staticmethod
+    def get_stock_buyorders(id, stock, session:Session) -> List[BuyOrder]:
+        """Returns all buyorders of a certain account of a specific stock"""
+        object = Stock.get_stock(stock, session)
+        if(object is None):
+            return []
+        return Session.query(BuyOrder).filter(BuyOrder.id == id, BuyOrder.stock_id == object.id).group_by(BuyOrder.stock_id).order_by(BuyOrder.buy_quantity, BuyOrder.buy_price).all()
 

@@ -1,3 +1,4 @@
+from symtable import Symbol
 from typing import Union
 
 import nextcord
@@ -12,7 +13,7 @@ from objects.economy.account import EconomyAccount
 from bot import BotCore
 from objects.orders.buy import BuyOrder
 from managers.sharesmanager import SharesManager, SharesManagerCodes
-
+from objects.stocks.stock import Stock
 
 class Market(commands.Cog):
     def  __init__(self, bot:BotCore):
@@ -38,11 +39,41 @@ class Market(commands.Cog):
             await ctx.send(CMD_NO_STOCK)
         else:
             await ctx.send("Error, something happened")
+
     @commands.command()
     async def viewbuys(self, ctx:commands.Context, stock = None):
         """View all your pending buy orders"""
+        embed = nextcord.Embed()
         account = ctx.author
-        BuyOrder.get_all_buyorders(account.id, self.bot.db_session)
+        if(stock == None):
+            orders = BuyOrder.get_all_buyorders(account.id, self.bot.db_session)
+            if(not orders):
+                await ctx.send("You have no pending buy orders")
+                return
+            embed = nextcord.Embed(title="{0.s}'s Buy Orders".format(ctx.author.display_name), color=0xff1155)
+            for order in orders:
+                embed.add_field(name = order.id, value = "{Symbol}: {Quantity} Shares @ ${Price}".format(
+                    Symbol = Stock.get_symbol(order.stock_id,self.bot.db_session), 
+                    Quantity = order.buy_quantity,
+                    Price = order.buy_price / 10000
+                    )
+                )
+        else:
+            if(Stock.get_stock(stock,self.bot.db_session) == None):
+                await ctx.send(CMD_NO_STOCK)
+                return
+            orders = BuyOrder.get_stock_buyorders(account.id, stock, self.bot.db_session)
+            if(not orders):
+                await ctx.send("You have no pending {} buy orders".format(stock))
+                return
+            embed = nextcord.Embed(title="{0.s}'s {} Buy Orders".format(ctx.author.display_name, stock), color=0xff1155)
+            for order in orders:
+                embed.add_field(name = order.id, value = "{Quantity} Shares @ ${Price}".format( 
+                    Quantity = order.buy_quantity,
+                    Price = order.buy_price / 10000
+                    )
+                )
+        await ctx.send(embed=embed)
         
 
 def setup(bot:BotCore):
