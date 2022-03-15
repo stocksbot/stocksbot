@@ -56,3 +56,10 @@ class BuyOrder(Base):
         Session.query(BuyOrder).filter(BuyOrder.id == id).delete()
         if(commit):
             session.commit()
+
+    @staticmethod
+    def get_all_buyorders(id, session:Session):
+        """Returns all buyorders of a certain account"""
+
+        return Session.query(BuyOrder).filter(BuyOrder.id == id).all()
+
