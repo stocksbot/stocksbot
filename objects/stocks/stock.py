@@ -69,3 +69,10 @@ class Stock(Base):
         logging.info("Updated {0} stock prices.".format(
             len(clean_stock_data)
         ))
+
+    @staticmethod
+    def get_all(session: Session):
+        return session.query(Stock).all()
+
+    def get_price(self):
+        return self.price / 10000 # Convert to database-friendly format
