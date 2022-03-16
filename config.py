@@ -12,12 +12,16 @@ ACTIVE_COGS = [
     "cogs.core",
     "cogs.economy",
     "cogs.income",
-    "cogs.stocks",
+    "cogs.tasks",
+    "cogs.stocksinfo",
+    "cogs.market",
 ]
 
 ACTIVE_OBJECTS = [
     "objects.economy.account",
     "objects.stocks.stock",
+    "objects.stocks.shares",
+    "objects.orders.buy"
 ]
 
 ACTIVE_SEEDERS = [
