@@ -54,7 +54,7 @@ class BuyOrder(Base):
     def delete_buyorder(id, session:Session, commit = True):
         """Delete a buyorder row"""
 
-        Session.query(BuyOrder).filter(BuyOrder.id == id).delete()
+        session.query(BuyOrder).filter(BuyOrder.id == id).delete()
         if(commit):
             session.commit()
 
