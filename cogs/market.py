@@ -66,10 +66,12 @@ class Market(commands.Cog):
         if(isinstance(account,User)):
             await ctx.send(CMD_NO_GUILD)
             return
+        # Get Economy Account
         econaccount = EconomyAccount.get_economy_account(account,self.bot.db_session,False)
         if(econaccount == None):
             await ctx.send(CMD_ACC_MISSING)
             return
+        # Show all buy orders
         if(stock == None):
             orders = BuyOrder.get_all_buyorders(econaccount.id, self.bot.db_session)
             if(not orders):
@@ -83,6 +85,7 @@ class Market(commands.Cog):
                     Price = order.buy_price / 10000
                     )
                 )
+        # Show all buy orders of a specific stock
         else:
             if(Stock.get_stock(stock,self.bot.db_session) == None):
                 await ctx.send(CMD_NO_STOCK)
