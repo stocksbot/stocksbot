@@ -44,7 +44,7 @@ class SharesManager():
             return SharesManagerCodes.SUCCESS_INSTANT
         else:
             # Do a pending buy order
-            account.decreasebalance(session, buy_quantity*currentprice, True, False) # Reserve balance from account for pending buy order
+            account.decreasebalance(session, buy_quantity*buy_price, True, False) # Reserve balance from account for pending buy order
             BuyOrder.create_buyorder(account.id, stockobject.id, buy_price, buy_quantity, session)
             session.commit()
             return SharesManagerCodes.SUCCESS_PENDING
