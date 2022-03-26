@@ -1,7 +1,9 @@
 from __future__ import annotations
+from asyncio.windows_events import NULL
 from binascii import Incomplete
 
 from datetime import datetime
+from msilib.schema import Error
 from typing import Optional
 import logging
 
@@ -104,6 +106,26 @@ class Shares(Base):
             shareQuery = Shares.create_shareholder_with_id(account_id,stock_id,amount,session,commit)
         else:
             shareQuery.amount_held += amount
+        if(commit):
+            session.commit()
+        return shareQuery
+
+    @staticmethod
+    def decrement_shares(account_id, stock_id, amount, session:Session, commit = True):
+        """Decrement shares held by account on a specific stock"""
+
+        shareQuery = session.query(Shares).filter(
+            Shares.account_id == account_id, 
+            Shares.stock_id == stock_id
+        ).first()
+        if(shareQuery == None):
+            logging.error("[ERROR] Tried to decrement a share that does not exist", account_id, stock_id)
+            return -1
+        else:
+            shareQuery.amount_held -= amount
+            if(shareQuery.amount_held < 0):
+                logging.error("[ERROR] Negative value reached for shares")
+                return -1
         if(commit):
             session.commit()
         return shareQuery
