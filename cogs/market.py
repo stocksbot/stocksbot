@@ -49,8 +49,6 @@ class Market(commands.Cog):
             await ctx.send(CMD_INST_BO)
         elif status == SharesManagerCodes.SUCCESS_PENDING:
             await ctx.send(CMD_PEND_BO)
-        elif status == SharesManagerCodes.ERR_ACC_DNE:
-            await ctx.send(CMD_ACC_MISSING)
         elif status == SharesManagerCodes.ERR_BAL_INSF:
             await ctx.send(CMD_NO_BALANCE)
         elif status == SharesManagerCodes.ERR_STOCK_DNE:
@@ -102,6 +100,41 @@ class Market(commands.Cog):
                     )
                 )
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def sell(self, ctx:commands.Context, symbol: str, quantity: int, price: float):
+        """Command for buying stocks"""
+        # Check if values are valid
+        member = ctx.author
+        if(isinstance(member,User)):
+            await ctx.send(CMD_NO_GUILD)
+            return
+        if(quantity <= 0):
+            await ctx.send(CMD_QTY_NP)
+            return
+        if(price < 0):
+            await ctx.send(CMD_PRC_NN)
+            return
+        # Convert to raw
+        price *= 10000
+        price = math.floor(price)
+        # Get economy account
+        account = EconomyAccount.get_economy_account(member, self.bot.db_session, False)
+        if(account == None):
+            await ctx.send(CMD_ACC_MISSING)
+            return
+        # Call sell_shares and handle status return
+        status = SharesManager.sell_shares(account, symbol, quantity, price, self.bot.db_session)
+        if status == SharesManagerCodes.SUCCESS_INSTANT:
+            await ctx.send(CMD_INST_SO)
+        elif status == SharesManagerCodes.SUCCESS_PENDING:
+            await ctx.send(CMD_PEND_SO)
+        elif status == SharesManagerCodes.ERR_BAL_INSF:
+            await ctx.send(CMD_NO_SHARES)
+        elif status == SharesManagerCodes.ERR_STOCK_DNE:
+            await ctx.send(CMD_NO_STOCK)
+        else:
+            await ctx.send("Error, something happened")
         
 
 def setup(bot:BotCore):

@@ -13,13 +13,12 @@ from objects.orders.sell import SellOrder
 class SharesManagerCodes(Enum):
     SUCCESS_INSTANT = 0
     SUCCESS_PENDING = 1
-    ERR_ACC_DNE = 2
-    ERR_BAL_INSF = 3
-    ERR_STOCK_DNE = 4
+    ERR_BAL_INSF = 2
+    ERR_STOCK_DNE = 3
 
 class SharesManager():
     @staticmethod
-    def buy_shares(account:EconomyAccount, symbol: str, buy_quantity: int, buy_price: int, session:Session):
+    def buy_shares(account:EconomyAccount, symbol: str, buy_quantity: int, buy_price: int, session:Session) -> SharesManagerCodes:
         """Increase owned shares while decreasing corresponding balance"""
 
         #Check if account balance can do order
@@ -53,7 +52,7 @@ class SharesManager():
             return SharesManagerCodes.SUCCESS_PENDING
 
     @staticmethod
-    def sell_shares(account:EconomyAccount, symbol: str, sell_quantity: int, sell_price: int, session:Session):
+    def sell_shares(account:EconomyAccount, symbol: str, sell_quantity: int, sell_price: int, session:Session) -> SharesManagerCodes:
         """Decrease owned shares while increasing corresponding balance"""
 
         # Get stock object

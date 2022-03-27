@@ -21,7 +21,8 @@ ACTIVE_OBJECTS = [
     "objects.economy.account",
     "objects.stocks.stock",
     "objects.stocks.shares",
-    "objects.orders.buy"
+    "objects.orders.buy",
+    "objects.orders.sell"
 ]
 
 ACTIVE_SEEDERS = [
