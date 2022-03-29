@@ -1,21 +1,24 @@
 import logging
+from nextcord import User, Member
 
 import nextcord
+from typing import Union
 from nextcord.ext import commands
+from bot import BotCore
 
 from messages.economy import *
 from objects.economy.account import EconomyAccount
 
 
 class Economy(commands.Cog):
-    def  __init__(self, bot):
+    def  __init__(self, bot:BotCore):
         self.bot = bot
 
     @commands.command()
-    async def bal(self, ctx, target: nextcord.Member=None):
-        """Shows target account's balance. If target account is not specified, the bot shows your balance instead.
-        
-        Example Usage: s!bal <player_name>"""
+    async def bal(self, ctx:commands.Context, target: Union[User, Member, None]=None):
+        """Shows target account's balance. If target account is not yet registered, applying this command will automatically register the account.
+        If target account is not specified, the bot shows your balance instead.
+        """
         if target is None:
             target = ctx.author
 
@@ -23,19 +26,28 @@ class Economy(commands.Cog):
         if target.bot:
             await ctx.send("Cannot inquire for bot's balance.")
             
+        if isinstance(target,User):
+            await ctx.send(CMD_NO_GUILD)
+            return
+
         # Get current economy account
-        else:
-            account = EconomyAccount.get_economy_account(
-                target,
-                self.bot.db_session
-            )
-            await ctx.send(CMD_BAL.format(target, account.get_balance()))
+        account = EconomyAccount.get_economy_account(
+            target,
+            self.bot.db_session
+        )
+        if(account == None):
+            await ctx.send(CMD_ACC_MISSING)
+            return
+        await ctx.send(CMD_BAL.format(target, account.get_balance()))
 
     @commands.command()
     @commands.is_owner()
-    async def registerall(self, ctx):
+    async def registerall(self, ctx:commands.Context):
         """(Owner) Gives all users in guild economy accounts."""
         registered = 0
+        if(ctx.guild == None):
+            logging.info("Tried to call registerall with no guild")
+            return
         for member in ctx.guild.members:
 
             # Avoid account creation for bots
@@ -67,8 +79,7 @@ class Economy(commands.Cog):
     async def removeplayer(self, ctx, target: nextcord.Member):
         """Removes a player from the game.
         Note: Removing a player deletes the player's account data including all of his assets. Proceed with caution.
-        
-        Example Usage: s!removeplayer <player_name>"""
+        """
         if target is None:
             await ctx.send("No account found.")
 
@@ -100,8 +111,10 @@ class Economy(commands.Cog):
             # Logs
             logging.info("Deleted account {0}".format(target))
 
+
+
         
 
 
-def setup(bot):
+def setup(bot:BotCore):
     bot.add_cog(Economy(bot))
