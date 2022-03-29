@@ -12,7 +12,7 @@ from messages.economy import *
 from messages.income import *
 from objects.economy.account import EconomyAccount
 from bot import BotCore
-from objects.orders.buy import BuyOrder
+from objects.orders.sell import SellOrder
 from managers.sharesmanager import SharesManager, SharesManagerCodes
 from objects.stocks.stock import Stock
 from typing import Optional
@@ -136,6 +136,50 @@ class Market(commands.Cog):
         else:
             await ctx.send("Error, something happened")
         
+    @commands.command()
+    async def viewsells(self, ctx:commands.Context, stock: Optional[str] = None):
+        """View all your pending sell orders"""
+        embed = nextcord.Embed()
+        account = ctx.author
+        if(isinstance(account,User)):
+            await ctx.send(CMD_NO_GUILD)
+            return
+        # Get Economy Account
+        econaccount = EconomyAccount.get_economy_account(account,self.bot.db_session,False)
+        if(econaccount == None):
+            await ctx.send(CMD_ACC_MISSING)
+            return
+        # Show all buy orders
+        if(stock == None):
+            orders = SellOrder.get_all_sellorders(econaccount.id, self.bot.db_session)
+            if(not orders):
+                await ctx.send("You have no pending sell orders")
+                return
+            embed = nextcord.Embed(title="{}'s Sell Orders".format(ctx.author.display_name), color=0xff1155)
+            for order in orders:
+                embed.add_field(name = "Order ID: {}".format(order.id), value = "{Symbol}: {Quantity} Shares @ ${Price}".format(
+                    Symbol = Stock.get_symbol(order.stock_id,self.bot.db_session), 
+                    Quantity = order.sell_quantity,
+                    Price = order.sell_price / 10000
+                    )
+                )
+        # Show all buy orders of a specific stock
+        else:
+            if(Stock.get_stock(stock,self.bot.db_session) == None):
+                await ctx.send(CMD_NO_STOCK)
+                return
+            orders = SellOrder.get_stock_sellorders(econaccount.id, stock, self.bot.db_session)
+            if(not orders):
+                await ctx.send("You have no pending {} sell orders".format(stock))
+                return
+            embed = nextcord.Embed(title="{}'s {} Sell Orders".format(ctx.author.display_name, stock), color=0xff1155)
+            for order in orders:
+                embed.add_field(name = "Order ID: {}".format(order.id), value = "{Quantity} Shares @ ${Price}".format( 
+                    Quantity = order.sell_quantity,
+                    Price = order.sell_price / 10000
+                    )
+                )
+        await ctx.send(embed=embed)
 
 def setup(bot:BotCore):
     bot.add_cog(Market(bot))

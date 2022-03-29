@@ -1,9 +1,7 @@
 from __future__ import annotations
-from asyncio.windows_events import NULL
 from binascii import Incomplete
 
 from datetime import datetime
-from msilib.schema import Error
 from typing import Optional
 import logging
 
