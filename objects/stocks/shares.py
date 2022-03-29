@@ -7,7 +7,7 @@ import logging
 
 from objects.stocks.stock import Stock
 from sqlalchemy import Column, Integer, Float, DateTime, String, or_, ForeignKey
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, relationship
 
 from objects.base import Base
 
@@ -17,6 +17,7 @@ class Shares(Base):
 
     account_id = Column(Integer, ForeignKey('economy_accounts.id'), primary_key=True)
     stock_id = Column(String(20), ForeignKey('stocks.id'), primary_key=True)
+    stock = relationship(Stock, backref='shares')
     amount_held = Column(Integer)
 
     created_at = Column(DateTime, default=datetime.now)

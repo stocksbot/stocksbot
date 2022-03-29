@@ -15,6 +15,7 @@ ACTIVE_COGS = [
     "cogs.tasks",
     "cogs.stocksinfo",
     "cogs.market",
+    "cogs.shares",
 ]
 
 ACTIVE_OBJECTS = [
