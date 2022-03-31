@@ -49,7 +49,6 @@ class Economy(commands.Cog):
             logging.info("Tried to call registerall with no guild")
             return
 
-        logging.info("Length of guild members: {0}".format(len(ctx.guild.members)))
         for member in ctx.guild.members:
 
             # Avoid account creation for bots
@@ -68,10 +67,8 @@ class Economy(commands.Cog):
                     member, self.bot.db_session,
                     member.bot or member.system, commit_on_execution=False
                 )
-                logging.info(SUCC_ACC.format(k))
                 registered += 1
-            else:
-                logging.info("Did not register")
+
 
         # Commit to DB
         self.bot.db_session.commit()
