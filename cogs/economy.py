@@ -16,8 +16,7 @@ class Economy(commands.Cog):
 
     @commands.command()
     async def bal(self, ctx:commands.Context, target: Union[User, Member, None]=None):
-        """Shows target account's balance. If target account is not yet registered, applying this command will automatically register the account.
-        If target account is not specified, the bot shows your balance instead.
+        """Shows target account's balance. If target account is not specified or does not exist, the bot shows your balance instead.
         """
         if target is None:
             target = ctx.author
@@ -33,10 +32,11 @@ class Economy(commands.Cog):
         # Get current economy account
         account = EconomyAccount.get_economy_account(
             target,
-            self.bot.db_session
+            self.bot.db_session,
+            create_if_not_exists=False
         )
         if(account == None):
-            await ctx.send(CMD_ACC_MISSING)
+            await ctx.send(ACC_DNE.format(target))
             return
         await ctx.send(CMD_BAL.format(target, account.get_balance()))
 
@@ -48,6 +48,8 @@ class Economy(commands.Cog):
         if(ctx.guild == None):
             logging.info("Tried to call registerall with no guild")
             return
+
+        logging.info("Length of guild members: {0}".format(len(ctx.guild.members)))
         for member in ctx.guild.members:
 
             # Avoid account creation for bots
@@ -61,15 +63,21 @@ class Economy(commands.Cog):
                 create_if_not_exists=False
             )
 
-            if k is None:
+            if k == None:
                 k = EconomyAccount.create_economy_account(
                     member, self.bot.db_session,
                     member.bot or member.system, commit_on_execution=False
                 )
+                logging.info(SUCC_ACC.format(k))
                 registered += 1
+            else:
+                logging.info("Did not register")
 
         # Commit to DB
         self.bot.db_session.commit()
+
+        # Inform creation of accounts
+        await ctx.send(SUCC_ACC_ALL.format(registered))
 
         # Logs
         logging.info("Registered {0} new accounts in the Economy database.".format(registered))
@@ -93,7 +101,7 @@ class Economy(commands.Cog):
         # Delete targeted account (if it exists)
 
         if account_checked is None:
-            await ctx.send("Account is not registered or does not exist.")
+            await ctx.send(ACC_DNE.format(target))
         
         else:
             account_deleted = EconomyAccount.delete_economy_account(
@@ -112,8 +120,51 @@ class Economy(commands.Cog):
             logging.info("Deleted account {0}".format(target))
 
 
+    @commands.command()
+    async def register(self, ctx:commands.Context, target: Union[User, Member, None]=None):
+        """Creates an economy account. A new account will receive an initial balance of $10,000.
+        (Owner/Admin) Creates an economy account for the target user specified.
+        """
+        if target is None:
+            target = ctx.author
 
+        if target != ctx.author:
+            if ctx.message.author.guild_permissions.administrator != True:
+                 await ctx.send("You do not have admin permissions to register another user.")
+                 return
+
+        # Prevent bot economy account creation
+        if target.bot:
+            await ctx.send("Cannot register a bot.")
+            return
         
+        # Check if user exists, else create
+        k = EconomyAccount.get_economy_account(
+            target,
+            self.bot.db_session,
+            create_if_not_exists=False
+        )
+
+        if k is None:
+            k = EconomyAccount.create_economy_account(
+                target, self.bot.db_session,
+                target.bot or target.system, commit_on_execution=False
+            )
+        elif target == ctx.author:
+            await ctx.send(YOUR_ACC_E)
+            return
+        else:
+            await ctx.send(ACC_E.format(target))
+            return
+
+        # Commit to DB
+        self.bot.db_session.commit()
+
+        # Inform account creation
+        await ctx.send(SUCC_ACC.format(target))
+
+        # Logs
+        logging.info("Created an account for {0}.".format(target))
 
 
 def setup(bot:BotCore):

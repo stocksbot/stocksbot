@@ -19,17 +19,23 @@ class Income(commands.Cog):
 
     @commands.command()
     async def showincome(self, ctx:commands.Context, target: Union[nextcord.User, nextcord.Member, None]=None):
-        """Returns target account's income."""
+        """Returns target account's income. If target account is not specified or does not exist, the bot shows your income instead."""
+
         if target is None:
             target = ctx.author
+
         # Get current economy account
         if isinstance(target, User):
             await ctx.send(CMD_NO_GUILD)
             return
-        account = EconomyAccount.get_economy_account(target, self.bot.db_session)
-        if(account == None):
-            await ctx.send(CMD_ACC_MISSING)
+
+        account = EconomyAccount.get_economy_account(target, self.bot.db_session, create_if_not_exists=False)
+        if(account == None and target == ctx.author):
+            await ctx.send(YOUR_ACC_DNE.format(target))
             return
+        elif (account == None):
+            await ctx.send(ACC_DNE.format(target))
+            return 
         await ctx.send(CMD_INCOME.format(target, account.get_income()))
 
     @commands.command()
@@ -68,23 +74,6 @@ class Income(commands.Cog):
                 self.bot.db_session,
                 False
             )
-<<<<<<< HEAD
-
-            # Update income status of targeted account (if it exists)
-            if account_checked is None:
-                await ctx.send(ACC_DNE.format(target))
-            
-            else:
-                account = EconomyAccount.updateincome(
-                    account_checked,
-                    self.bot.db_session,
-                    newincome
-                )
-    
-                await ctx.send(CMD_SUCCESS_UPDATEINCOME.format(target, newincome))
-
-=======
->>>>>>> 8fcb0189badadbcecdb0eb89f10e402d4cb92d69
 
             # Update income status of targeted account (if it exists)
             if account_checked is None:
