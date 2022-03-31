@@ -7,7 +7,7 @@ import logging
 
 from objects.stocks.stock import Stock
 from sqlalchemy import Column, Integer, Float, DateTime, String, or_, ForeignKey
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, relationship
 
 from objects.base import Base
 
@@ -17,6 +17,7 @@ class Shares(Base):
 
     account_id = Column(Integer, ForeignKey('economy_accounts.id'), primary_key=True)
     stock_id = Column(String(20), ForeignKey('stocks.id'), primary_key=True)
+    stock = relationship(Stock, backref='shares')
     amount_held = Column(Integer)
 
     created_at = Column(DateTime, default=datetime.now)
@@ -104,6 +105,26 @@ class Shares(Base):
             shareQuery = Shares.create_shareholder_with_id(account_id,stock_id,amount,session,commit)
         else:
             shareQuery.amount_held += amount
+        if(commit):
+            session.commit()
+        return shareQuery
+
+    @staticmethod
+    def decrement_shares(account_id, stock_id, amount, session:Session, commit = True):
+        """Decrement shares held by account on a specific stock"""
+
+        shareQuery = session.query(Shares).filter(
+            Shares.account_id == account_id, 
+            Shares.stock_id == stock_id
+        ).first()
+        if(shareQuery == None):
+            logging.error("[ERROR] Tried to decrement a share that does not exist", account_id, stock_id)
+            return -1
+        else:
+            shareQuery.amount_held -= amount
+            if(shareQuery.amount_held < 0):
+                logging.error("[ERROR] Negative value reached for shares")
+                return -1
         if(commit):
             session.commit()
         return shareQuery

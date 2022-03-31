@@ -1,5 +1,5 @@
 from decimal import Context
-from typing import Union
+from typing import Union, Optional
 import logging
 
 import nextcord
@@ -56,12 +56,17 @@ class Income(commands.Cog):
                 await ctx.send(CMD_CLAIMFAILMINUTES.format(minutes))
 
     @commands.command()
-    @commands.check_any(commands.is_owner(), commands.has_permissions(administrator=True))
-    async def updateincome(self, ctx, target: nextcord.Member=None, newincome: float=None):
+    @commands.check_any(commands.is_owner(), commands.has_permissions(administrator=True)) # type: ignore
+    async def updateincome(self, ctx, target: Union[nextcord.Member,nextcord.User,None]=None, newincome: Optional[float]=None):
         """(Owner/Admin) Updates a player's income status."""
         if newincome is None:
             await ctx.send("Invalid command usage. Try **s!help updateincome** for help regarding this command.")
         else:
+            # Check if target is Member
+            if not isinstance(target, nextcord.Member):
+                await ctx.send(CMD_NO_GUILD)
+                return
+
             # Check if targeted account exists
             account_checked = EconomyAccount.get_economy_account(
                 target,

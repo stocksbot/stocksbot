@@ -23,6 +23,7 @@ class Tasks(commands.Cog):
         fetcher = YahooFetcher()
         StocksManager.update_stock_prices(self.bot.db_session, fetcher)
         OrderManager.checkex_buyorders(self.bot.db_session)
+        OrderManager.checkex_sellorders(self.bot.db_session)
 
 def setup(bot:BotCore):
     bot.add_cog(Tasks(bot))
