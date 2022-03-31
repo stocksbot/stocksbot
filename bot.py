@@ -1,6 +1,7 @@
 import nextcord, schedule, logging
 
 from nextcord.ext import commands
+from nextcord.ext.commands.errors import CommandOnCooldown
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -24,7 +25,7 @@ class BotCore(commands.AutoShardedBot):
         await self.process_commands(message)
 
     async def on_command_error(self, ctx, err):
-        if type(err) == nextcord.ext.commands.errors.CommandOnCooldown:
+        if type(err) == CommandOnCooldown:
             await ctx.send("{0.mention}: **__{1}__**".format(ctx.author, err))
             return
         logging.error("Command error: {0} [author: {1.author}][cmd: {1.command}]".format(err, ctx))

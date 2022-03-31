@@ -1,37 +1,53 @@
+from decimal import Context
+from typing import Union, Optional
 import logging
 
 import nextcord
+from nextcord import User
 from nextcord.ext import commands
 from datetime import datetime, timedelta
 
 from messages.economy import *
 from messages.income import CMD_CLAIM, CMD_CLAIMFAILHOURS, CMD_CLAIMFAILMINUTES, CMD_INCOME, CMD_SUCCESS_UPDATEINCOME
 from objects.economy.account import EconomyAccount
+from bot import BotCore
 
 
 class Income(commands.Cog):
-    def  __init__(self, bot):
+    def  __init__(self, bot:BotCore):
         self.bot = bot
 
     @commands.command()
-    async def showincome(self, ctx, target: nextcord.Member=None):
+    async def showincome(self, ctx:commands.Context, target: Union[nextcord.User, nextcord.Member, None]=None):
         """Returns target account's income."""
         if target is None:
             target = ctx.author
         # Get current economy account
+        if isinstance(target, User):
+            await ctx.send(CMD_NO_GUILD)
+            return
         account = EconomyAccount.get_economy_account(target, self.bot.db_session)
+        if(account == None):
+            await ctx.send(CMD_ACC_MISSING)
+            return
         await ctx.send(CMD_INCOME.format(target, account.get_income()))
 
     @commands.command()
-    async def claimincome(self, ctx):
+    async def claimincome(self, ctx:commands.Context):
         """Dispenses income to author's account"""
-        account = EconomyAccount.get_economy_account(ctx.author, self.bot.db_session)
+        target = ctx.author
+        if isinstance(target,User):
+            await ctx.send(CMD_NO_GUILD)
+            return
+        account = EconomyAccount.get_economy_account(target, self.bot.db_session)
+        if(account == None):
+            await ctx.send(CMD_ACC_MISSING)
+            return
         status = account.dispense_income(self.bot.db_session)
         if(status == 0):
             await ctx.send(CMD_CLAIM.format(ctx.author, account.get_income(), account.get_balance()))
         else:
-            nextready = account.lastclaim + timedelta(days=1)
-            timediff = nextready - datetime.now()
+            timediff = status - datetime.now()
             hours = timediff.seconds//3600
             minutes = (timediff.seconds//60)%60
             if(hours >= 1):
@@ -40,12 +56,45 @@ class Income(commands.Cog):
                 await ctx.send(CMD_CLAIMFAILMINUTES.format(minutes))
 
     @commands.command()
+<<<<<<< HEAD
     @commands.check_any(commands.is_owner(), commands.has_permissions(administrator=True))
     async def updateincome(self, ctx, target: nextcord.Member=None, newincome: float=None):
+=======
+    @commands.check_any(commands.is_owner(), commands.has_permissions(administrator=True)) # type: ignore
+    async def updateincome(self, ctx, target: Union[nextcord.Member,nextcord.User,None]=None, newincome: Optional[float]=None):
+>>>>>>> 59aacb595dec3b38850a3ea2b40a43901ab28deb
         """(Owner/Admin) Updates a player's income status."""
         if newincome is None:
             await ctx.send("Invalid command usage. Try **s!help updateincome** for help regarding this command.")
         else:
+<<<<<<< HEAD
+            # Check if targeted account exists
+            account_checked = EconomyAccount.get_economy_account(
+                target,
+                self.bot.db_session,
+                False
+            )
+
+            # Update income status of targeted account (if it exists)
+            if account_checked is None:
+                await ctx.send(ACC_DNE.format(target))
+            
+            else:
+                account = EconomyAccount.updateincome(
+                    account_checked,
+                    self.bot.db_session,
+                    newincome
+                )
+    
+                await ctx.send(CMD_SUCCESS_UPDATEINCOME.format(target, newincome))
+
+=======
+            # Check if target is Member
+            if not isinstance(target, nextcord.Member):
+                await ctx.send(CMD_NO_GUILD)
+                return
+>>>>>>> 59aacb595dec3b38850a3ea2b40a43901ab28deb
+
             # Check if targeted account exists
             account_checked = EconomyAccount.get_economy_account(
                 target,
@@ -67,5 +116,5 @@ class Income(commands.Cog):
                 await ctx.send(CMD_SUCCESS_UPDATEINCOME.format(target, newincome))
 
 
-def setup(bot):
+def setup(bot:BotCore):
     bot.add_cog(Income(bot))

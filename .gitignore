@@ -2,3 +2,4 @@
 *.db
 secrets.json
 __pycache__
+vm/

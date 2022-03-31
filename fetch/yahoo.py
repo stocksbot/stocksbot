@@ -36,6 +36,9 @@ class YahooFetcher():
         self.clean_data = None
 
     def fetch_all(self):
+        if(self.configs == None):
+            logging.error("[ERROR] self.configs does not exist.")
+            return
         response = requests.get(
             self.configs['endpoint'],
             params={
@@ -58,14 +61,18 @@ class YahooFetcher():
         self.raw_data = response.json()
 
     def raw_to_clean(self):
+        if(self.raw_data == None):
+            logging.error("[ERROR] self.raw_data does not exist.")
+            return
         self.clean_data = []
 
         tickers = self.raw_data['quoteResponse']['result']
         for t in tickers:
+            truncated_price = int(t['ask'] * 10000)
             stock = {
                 'name': t['shortName'],
                 'symbol': t['symbol'],
-                'price': float(t['ask']),
+                'price': truncated_price,
             }
             self.clean_data.append(stock)
 
