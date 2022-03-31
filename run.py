@@ -9,6 +9,8 @@ from config import COMMAND_PREFIX
 
 from objects import base
 
+import nextcord
+
 
 def create_secrets_file():
     """Generate/overwrite the secrets file for this bot."""    
@@ -70,7 +72,9 @@ def main():
     DISCORD_TOKEN = get_discord_token()
 
     # Instantiate our bot object
-    bot = BotCore(command_prefix=COMMAND_PREFIX)
+    intents = nextcord.Intents.default()
+    intents.members = True
+    bot = BotCore(command_prefix=COMMAND_PREFIX, intents=intents)
     bot.remove_command("help") # Overwrite default help command
 
     # We need to preload the objects to add them to
