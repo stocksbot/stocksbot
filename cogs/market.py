@@ -6,6 +6,7 @@ import math
 from nextcord import User, Member
 from nextcord.ext import commands
 from datetime import datetime, timedelta
+from managers.ordermanager import OrderManager
 
 from objects.orders.buy import BuyOrder
 from messages.economy import *
@@ -180,6 +181,44 @@ class Market(commands.Cog):
                     )
                 )
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def cancelorder(self, ctx:commands.Context, buyorsell: str, orderID: int):
+        """Cancel a pending buy or sell order"""
+        if buyorsell.lower() in ["buy", "b"]:
+            account = ctx.author
+            if(isinstance(account,User)):
+                await ctx.send(CMD_NO_GUILD)
+                return
+             # Get Economy Account
+            econaccount = EconomyAccount.get_economy_account(account,self.bot.db_session,False)
+            if(econaccount == None):
+                await ctx.send(CMD_ACC_MISSING)
+                return
+            status = OrderManager.cancel_buyorder(self.bot.db_session, econaccount, orderID)
+            if status == 0:
+                await ctx.send("Cancellation successful")
+            else:
+                await ctx.send("Something went wrong, please try again")
+
+        elif buyorsell.lower() in ["sell", "s"]:
+            account = ctx.author
+            if(isinstance(account,User)):
+                await ctx.send(CMD_NO_GUILD)
+                return
+             # Get Economy Account
+            econaccount = EconomyAccount.get_economy_account(account,self.bot.db_session,False)
+            if(econaccount == None):
+                await ctx.send(CMD_ACC_MISSING)
+                return
+            status = OrderManager.cancel_sellorder(self.bot.db_session, econaccount, orderID)
+            if status == 0:
+                await ctx.send("Cancellation successful")
+            else:
+                await ctx.send("Something went wrong, please try again")
+
+        else:
+            await ctx.send("Invalid order type, please use one of the following: buy, b, sell, s")
 
 def setup(bot:BotCore):
     bot.add_cog(Market(bot))
