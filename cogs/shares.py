@@ -10,6 +10,8 @@ from objects.stocks.shares import Shares
 from objects.economy.account import EconomyAccount
 from bot import BotCore
 
+from datetime import datetime
+
 
 class SharesInfo(commands.Cog):
     def  __init__(self, bot:BotCore):
@@ -24,12 +26,24 @@ class SharesInfo(commands.Cog):
             return
         # Get Economy Account
         econaccount = EconomyAccount.get_economy_account(account,self.bot.db_session,False)
-        embed = nextcord.Embed(title="Your Shares", color=0xff1155)
+        embed = nextcord.Embed(
+            title="{}'s Shares".format(ctx.author.display_name), 
+            color=0xFFD700
+        )
 
         shares = Shares.get_all_shares(econaccount.id, self.bot.db_session)
         for share in shares:
-            embed.add_field(name=share.stock.symbol, value=share.amount_held)
+            embed.add_field(
+                name=share.stock.symbol,
+                value="Amount: {}".format(share.amount_held),
+                inline=True
+            )
     
+        now = datetime.utcnow()
+        now_as_string = now.strftime("%m/%d/%Y %H:%M:%S")
+        footer_text = "as of {} UTC".format(now_as_string)
+        embed.set_footer(text=footer_text)
+
         await ctx.send(embed=embed)
 
 
