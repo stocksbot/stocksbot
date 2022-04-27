@@ -183,9 +183,9 @@ class Market(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def cancelorder(self, ctx:commands.Context, buyorsell: str, orderID: int):
+    async def cancelorder(self, ctx:commands.Context, buy_or_sell: str, orderID: int):
         """Cancel a pending buy or sell order"""
-        if buyorsell.lower() in ["buy", "b"]:
+        if buy_or_sell.lower() in ["buy", "b"]:
             account = ctx.author
             if(isinstance(account,User)):
                 await ctx.send(CMD_NO_GUILD)
@@ -201,7 +201,7 @@ class Market(commands.Cog):
             else:
                 await ctx.send("Something went wrong, please try again")
 
-        elif buyorsell.lower() in ["sell", "s"]:
+        elif buy_or_sell.lower() in ["sell", "s"]:
             account = ctx.author
             if(isinstance(account,User)):
                 await ctx.send(CMD_NO_GUILD)
