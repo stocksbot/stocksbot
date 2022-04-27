@@ -35,9 +35,9 @@ class StocksInfo(commands.Cog):
                 inline=True
             )
 
-        now = datetime.now()
+        now = datetime.utcnow()
         now_as_string = now.strftime("%m/%d/%Y %H:%M:%S")
-        footer_text = "as of {}".format(now_as_string)
+        footer_text = "as of {} UTC".format(now_as_string)
 
         embed.set_footer(text=footer_text)
 
