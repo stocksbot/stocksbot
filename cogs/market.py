@@ -81,7 +81,7 @@ class Market(commands.Cog):
                 value="{symbol}\nAmount: {amount}\nPrice: {price}".format(
                     symbol=Stock.get_symbol(order.stock_id,self.bot.db_session),
                     amount=order.buy_quantity,
-                    price=order.buy_price/1000
+                    price=order.buy_price/10000
                 )
                 embed.add_field(
                     name="Order ID: {}".format(order.id),
@@ -101,7 +101,7 @@ class Market(commands.Cog):
                 value="Amount: {amount}\nPrice: {price}".format(
                     symbol=Stock.get_symbol(order.stock_id,self.bot.db_session),
                     amount=order.buy_quantity,
-                    price=order.buy_price/1000
+                    price=order.buy_price/10000
                 )
                 embed.add_field(
                     name="Order ID: {}".format(order.id),
@@ -174,7 +174,7 @@ class Market(commands.Cog):
                 value="{symbol}\nAmount: {amount}\nPrice: {price}".format(
                     symbol=Stock.get_symbol(order.stock_id,self.bot.db_session),
                     amount=order.sell_quantity,
-                    price=order.sell_price/1000
+                    price=order.sell_price/10000
                 )
                 embed.add_field(
                     name="Order ID: {}".format(order.id),
@@ -193,7 +193,7 @@ class Market(commands.Cog):
             for order in orders:
                 value="\nAmount: {amount}\nPrice: {price}".format(
                     amount=order.sell_quantity,
-                    price=order.sell_price/1000
+                    price=order.sell_price/10000
                 )
                 embed.add_field(
                     name="Order ID: {}".format(order.id),
@@ -222,9 +222,9 @@ class Market(commands.Cog):
                 return
             status = OrderManager.cancel_buyorder(self.bot.db_session, econaccount, orderID)
             if status == 0:
-                await ctx.send("Cancellation successful")
+                await ctx.send("🟢 Cancellation successful")
             else:
-                await ctx.send("Something went wrong, please try again")
+                await ctx.send("🔴 Something went wrong, please try again")
 
         elif buy_or_sell.lower() in ["sell", "s"]:
             account = ctx.author
@@ -238,9 +238,9 @@ class Market(commands.Cog):
                 return
             status = OrderManager.cancel_sellorder(self.bot.db_session, econaccount, orderID)
             if status == 0:
-                await ctx.send("Cancellation successful")
+                await ctx.send("🟢 Cancellation successful")
             else:
-                await ctx.send("Something went wrong, please try again")
+                await ctx.send("🔴 Something went wrong, please try again")
 
         else:
             await ctx.send("Invalid order type, please use one of the following: buy, b, sell, s")
