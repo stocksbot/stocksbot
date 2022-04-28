@@ -76,13 +76,16 @@ class Market(commands.Cog):
             if(not orders):
                 await ctx.send("You have no pending buy orders")
                 return
-            embed = nextcord.Embed(title="{}'s Buy Orders".format(ctx.author.display_name), color=0xff1155)
+            embed = nextcord.Embed(title="{}'s Buy Orders".format(ctx.author.display_name), color=0x00FF00)
             for order in orders:
-                embed.add_field(name = "Order ID: {}".format(order.id), value = "{Symbol}: {Quantity} Shares @ ${Price}".format(
-                    Symbol = Stock.get_symbol(order.stock_id,self.bot.db_session), 
-                    Quantity = order.buy_quantity,
-                    Price = order.buy_price / 10000
-                    )
+                value="{symbol}\nAmount: {amount}\nPrice: {price}".format(
+                    symbol=Stock.get_symbol(order.stock_id,self.bot.db_session),
+                    amount=order.buy_quantity,
+                    price=order.buy_price/1000
+                )
+                embed.add_field(
+                    name="Order ID: {}".format(order.id),
+                    value=value
                 )
         # Show all buy orders of a specific stock
         else:
@@ -93,13 +96,23 @@ class Market(commands.Cog):
             if(not orders):
                 await ctx.send("You have no pending {} buy orders".format(stock))
                 return
-            embed = nextcord.Embed(title="{}'s {} Buy Orders".format(ctx.author.display_name, stock), color=0xff1155)
+            embed = nextcord.Embed(title="{}'s Buy Orders for {}".format(ctx.author.display_name, stock), color=0x00FF00)
             for order in orders:
-                embed.add_field(name = "Order ID: {}".format(order.id), value = "{Quantity} Shares @ ${Price}".format( 
-                    Quantity = order.buy_quantity,
-                    Price = order.buy_price / 10000
-                    )
+                value="Amount: {amount}\nPrice: {price}".format(
+                    symbol=Stock.get_symbol(order.stock_id,self.bot.db_session),
+                    amount=order.buy_quantity,
+                    price=order.buy_price/1000
                 )
+                embed.add_field(
+                    name="Order ID: {}".format(order.id),
+                    value=value
+                )
+    
+        now = datetime.utcnow()
+        now_as_string = now.strftime("%m/%d/%Y %H:%M:%S")
+        footer_text = "as of {} UTC".format(now_as_string)
+        embed.set_footer(text=footer_text)
+
         await ctx.send(embed=embed)
 
     @commands.command()
@@ -156,13 +169,16 @@ class Market(commands.Cog):
             if(not orders):
                 await ctx.send("You have no pending sell orders")
                 return
-            embed = nextcord.Embed(title="{}'s Sell Orders".format(ctx.author.display_name), color=0xff1155)
+            embed = nextcord.Embed(title="{}'s Sell Orders".format(ctx.author.display_name), color=0xFF0000)
             for order in orders:
-                embed.add_field(name = "Order ID: {}".format(order.id), value = "{Symbol}: {Quantity} Shares @ ${Price}".format(
-                    Symbol = Stock.get_symbol(order.stock_id,self.bot.db_session), 
-                    Quantity = order.sell_quantity,
-                    Price = order.sell_price / 10000
-                    )
+                value="{symbol}\nAmount: {amount}\nPrice: {price}".format(
+                    symbol=Stock.get_symbol(order.stock_id,self.bot.db_session),
+                    amount=order.sell_quantity,
+                    price=order.sell_price/1000
+                )
+                embed.add_field(
+                    name="Order ID: {}".format(order.id),
+                    value=value
                 )
         # Show all buy orders of a specific stock
         else:
@@ -173,13 +189,22 @@ class Market(commands.Cog):
             if(not orders):
                 await ctx.send("You have no pending {} sell orders".format(stock))
                 return
-            embed = nextcord.Embed(title="{}'s {} Sell Orders".format(ctx.author.display_name, stock), color=0xff1155)
+            embed = nextcord.Embed(title="{}'s Sell Orders for {}".format(ctx.author.display_name, stock), color=0xFF0000)
             for order in orders:
-                embed.add_field(name = "Order ID: {}".format(order.id), value = "{Quantity} Shares @ ${Price}".format( 
-                    Quantity = order.sell_quantity,
-                    Price = order.sell_price / 10000
-                    )
+                value="\nAmount: {amount}\nPrice: {price}".format(
+                    amount=order.sell_quantity,
+                    price=order.sell_price/1000
                 )
+                embed.add_field(
+                    name="Order ID: {}".format(order.id),
+                    value=value
+                )
+
+        now = datetime.utcnow()
+        now_as_string = now.strftime("%m/%d/%Y %H:%M:%S")
+        footer_text = "as of {} UTC".format(now_as_string)
+        embed.set_footer(text=footer_text)
+        
         await ctx.send(embed=embed)
 
     @commands.command()
