@@ -58,6 +58,14 @@ class SellOrder(Base):
         if(commit):
             session.commit()
 
+    def delete(self, session:Session, commit = True):
+        """Delete self, returns amount of rows deleted"""
+        
+        rows_deleted = session.query(SellOrder).filter(SellOrder.id == self.id).delete()
+        if(commit):
+            session.commit()
+        return rows_deleted
+
     @staticmethod
     def get_all_sellorders(id, session:Session) -> List[SellOrder]:
         """Returns all SellOrders of a certain account"""
