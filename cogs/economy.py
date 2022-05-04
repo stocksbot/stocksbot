@@ -15,17 +15,10 @@ class Economy(commands.Cog):
         self.bot = bot
 
     @commands.command()
-<<<<<<< HEAD
-    async def bal(self, ctx, target: nextcord.Member=None):
-        """Shows target account's balance. If target account is not specified, the bot shows your balance instead.
-        
-        Example Usage: s!bal <player_name>"""
-=======
     async def bal(self, ctx:commands.Context, target: Union[User, Member, None]=None):
         """Shows target account's balance. If target account is not yet registered, applying this command will automatically register the account.
         If target account is not specified, the bot shows your balance instead.
         """
->>>>>>> 59aacb595dec3b38850a3ea2b40a43901ab28deb
         if target is None:
             target = ctx.author
 
@@ -33,15 +26,6 @@ class Economy(commands.Cog):
         if target.bot:
             await ctx.send("Cannot inquire for bot's balance.")
             
-<<<<<<< HEAD
-        # Get current economy account
-        else:
-            account = EconomyAccount.get_economy_account(
-                target,
-                self.bot.db_session
-            )
-            await ctx.send(CMD_BAL.format(target, account.get_balance()))
-=======
         if isinstance(target,User):
             await ctx.send(CMD_NO_GUILD)
             return
@@ -55,7 +39,6 @@ class Economy(commands.Cog):
             await ctx.send(CMD_ACC_MISSING)
             return
         await ctx.send(CMD_BAL.format(target, account.get_balance()))
->>>>>>> 59aacb595dec3b38850a3ea2b40a43901ab28deb
 
     @commands.command()
     @commands.is_owner()
@@ -96,12 +79,7 @@ class Economy(commands.Cog):
     async def removeplayer(self, ctx, target: nextcord.Member):
         """Removes a player from the game.
         Note: Removing a player deletes the player's account data including all of his assets. Proceed with caution.
-<<<<<<< HEAD
-        
-        Example Usage: s!removeplayer <player_name>"""
-=======
         """
->>>>>>> 59aacb595dec3b38850a3ea2b40a43901ab28deb
         if target is None:
             await ctx.send("No account found.")
 
@@ -132,11 +110,6 @@ class Economy(commands.Cog):
 
             # Logs
             logging.info("Deleted account {0}".format(target))
-<<<<<<< HEAD
-
-        
-=======
->>>>>>> 59aacb595dec3b38850a3ea2b40a43901ab28deb
 
 
 
