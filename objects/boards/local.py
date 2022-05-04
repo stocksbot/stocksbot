@@ -103,7 +103,7 @@ class LocalLeaderboard(Base):
         points = leaderboard.points.split(' ')
 
         for rank in range(size):
-            if current_user.balance > int(points[rank]):
+            if (current_user.balance > int(points[rank])) or (top_users_name[rank] == '---'):
                 # Replace the last place
                 if rank == size-1:
                     top_users_id[rank] = str(member.id)
@@ -117,6 +117,7 @@ class LocalLeaderboard(Base):
                     leaderboard.points = ' '.join([str(item) for item in points]) 
                     session.commit()
                     return rank+1
+                # Replace the <rank>th place
                 else:
                     pos = size-1
                     while pos != rank:
@@ -143,16 +144,14 @@ class LocalLeaderboard(Base):
     @staticmethod
     def remove_from_board(member:Member, session:Session, leaderboard):
         user_id = str(member.id)
-        print("user_id: " + user_id)
+
         size = leaderboard.size
         top_users_id = leaderboard.top_users_id.split(' ')
-        print(top_users_id)
         top_users_name = leaderboard.top_users_name.split(' ')
         top_users_tag = leaderboard.top_users_tag.split(' ')
         points = leaderboard.points.split(' ')
 
         if user_id in top_users_id:
-            print("found in top_users_id")
             index = top_users_id.index(user_id)
             for pos in range(index, size-2):
                 top_users_id[pos] = top_users_id[pos+1]
