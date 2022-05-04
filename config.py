@@ -16,6 +16,7 @@ ACTIVE_COGS = [
     "cogs.stocksinfo",
     "cogs.market",
     "cogs.shares",
+    "cogs.boards"
 ]
 
 ACTIVE_OBJECTS = [
@@ -23,7 +24,8 @@ ACTIVE_OBJECTS = [
     "objects.stocks.stock",
     "objects.stocks.shares",
     "objects.orders.buy",
-    "objects.orders.sell"
+    "objects.orders.sell",
+    "objects.boards.local"
 ]
 
 ACTIVE_SEEDERS = [
