@@ -48,3 +48,58 @@ class OrderManager():
                 econaccount.increasebalance(session,(order.sell_quantity*order.sell_price), True, False) #refund reserved balance
                 SellOrder.delete_sellorder(order.id,session,False)
                 session.commit()
+
+    @staticmethod
+    def cancel_buyorder(session:Session, EconAccount: EconomyAccount, OrderID: int):
+        """
+            Checks if you can cancel the buyorder and then does so if possible
+            return statuses
+            0 = successful
+            1 = something went wrong
+        """
+        EconID = EconAccount.id
+        BuyOrders = BuyOrder.get_all_buyorders(EconID, session)
+        targetOrder = None
+        for order in BuyOrders:
+            if order.id == OrderID:
+                targetOrder = order
+                break
+        if targetOrder is None:
+            return 1
+        else:
+            refund = targetOrder.buy_price * targetOrder.buy_quantity
+            EconAccount.increasebalance(session, refund, True, False)
+            rows_deleted = targetOrder.delete(session, False)
+            if rows_deleted > 0:
+                session.commit()
+                return 0
+            else:
+                session.rollback()
+                return 1
+
+    @staticmethod
+    def cancel_sellorder(session:Session, EconAccount: EconomyAccount, OrderID: int):
+        """
+            Checks if you can cancel the sellorder and then does so if possible
+            return statuses
+            0 = successful
+            1 = something went wrong
+        """
+        EconID = EconAccount.id
+        SellOrders = SellOrder.get_all_sellorders(EconID, session)
+        targetOrder = None
+        for order in SellOrders:
+            if order.id == OrderID:
+                targetOrder = order
+                break
+        if targetOrder is None:
+            return 1
+        else:
+            Shares.increment_shares(EconID, targetOrder.stock_id, targetOrder.sell_quantity, session, False)
+            rows_deleted = targetOrder.delete(session, False)
+            if rows_deleted > 0:
+                session.commit()
+                return 0
+            else:
+                session.rollback()
+                return 1

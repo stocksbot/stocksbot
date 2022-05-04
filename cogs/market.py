@@ -6,6 +6,7 @@ import math
 from nextcord import User, Member
 from nextcord.ext import commands
 from datetime import datetime, timedelta
+from managers.ordermanager import OrderManager
 
 from objects.orders.buy import BuyOrder
 from messages.economy import *
@@ -75,13 +76,16 @@ class Market(commands.Cog):
             if(not orders):
                 await ctx.send("You have no pending buy orders")
                 return
-            embed = nextcord.Embed(title="{}'s Buy Orders".format(ctx.author.display_name), color=0xff1155)
+            embed = nextcord.Embed(title="{}'s Buy Orders".format(ctx.author.display_name), color=0x00FF00)
             for order in orders:
-                embed.add_field(name = "Order ID: {}".format(order.id), value = "{Symbol}: {Quantity} Shares @ ${Price}".format(
-                    Symbol = Stock.get_symbol(order.stock_id,self.bot.db_session), 
-                    Quantity = order.buy_quantity,
-                    Price = order.buy_price / 10000
-                    )
+                value="{symbol}\nAmount: {amount}\nPrice: {price}".format(
+                    symbol=Stock.get_symbol(order.stock_id,self.bot.db_session),
+                    amount=order.buy_quantity,
+                    price=order.buy_price/10000
+                )
+                embed.add_field(
+                    name="Order ID: {}".format(order.id),
+                    value=value
                 )
         # Show all buy orders of a specific stock
         else:
@@ -92,13 +96,23 @@ class Market(commands.Cog):
             if(not orders):
                 await ctx.send("You have no pending {} buy orders".format(stock))
                 return
-            embed = nextcord.Embed(title="{}'s {} Buy Orders".format(ctx.author.display_name, stock), color=0xff1155)
+            embed = nextcord.Embed(title="{}'s Buy Orders for {}".format(ctx.author.display_name, stock), color=0x00FF00)
             for order in orders:
-                embed.add_field(name = "Order ID: {}".format(order.id), value = "{Quantity} Shares @ ${Price}".format( 
-                    Quantity = order.buy_quantity,
-                    Price = order.buy_price / 10000
-                    )
+                value="Amount: {amount}\nPrice: {price}".format(
+                    symbol=Stock.get_symbol(order.stock_id,self.bot.db_session),
+                    amount=order.buy_quantity,
+                    price=order.buy_price/10000
                 )
+                embed.add_field(
+                    name="Order ID: {}".format(order.id),
+                    value=value
+                )
+    
+        now = datetime.utcnow()
+        now_as_string = now.strftime("%m/%d/%Y %H:%M:%S")
+        footer_text = "as of {} UTC".format(now_as_string)
+        embed.set_footer(text=footer_text)
+
         await ctx.send(embed=embed)
 
     @commands.command()
@@ -155,13 +169,16 @@ class Market(commands.Cog):
             if(not orders):
                 await ctx.send("You have no pending sell orders")
                 return
-            embed = nextcord.Embed(title="{}'s Sell Orders".format(ctx.author.display_name), color=0xff1155)
+            embed = nextcord.Embed(title="{}'s Sell Orders".format(ctx.author.display_name), color=0xFF0000)
             for order in orders:
-                embed.add_field(name = "Order ID: {}".format(order.id), value = "{Symbol}: {Quantity} Shares @ ${Price}".format(
-                    Symbol = Stock.get_symbol(order.stock_id,self.bot.db_session), 
-                    Quantity = order.sell_quantity,
-                    Price = order.sell_price / 10000
-                    )
+                value="{symbol}\nAmount: {amount}\nPrice: {price}".format(
+                    symbol=Stock.get_symbol(order.stock_id,self.bot.db_session),
+                    amount=order.sell_quantity,
+                    price=order.sell_price/10000
+                )
+                embed.add_field(
+                    name="Order ID: {}".format(order.id),
+                    value=value
                 )
         # Show all buy orders of a specific stock
         else:
@@ -172,14 +189,61 @@ class Market(commands.Cog):
             if(not orders):
                 await ctx.send("You have no pending {} sell orders".format(stock))
                 return
-            embed = nextcord.Embed(title="{}'s {} Sell Orders".format(ctx.author.display_name, stock), color=0xff1155)
+            embed = nextcord.Embed(title="{}'s Sell Orders for {}".format(ctx.author.display_name, stock), color=0xFF0000)
             for order in orders:
-                embed.add_field(name = "Order ID: {}".format(order.id), value = "{Quantity} Shares @ ${Price}".format( 
-                    Quantity = order.sell_quantity,
-                    Price = order.sell_price / 10000
-                    )
+                value="\nAmount: {amount}\nPrice: {price}".format(
+                    amount=order.sell_quantity,
+                    price=order.sell_price/10000
                 )
+                embed.add_field(
+                    name="Order ID: {}".format(order.id),
+                    value=value
+                )
+
+        now = datetime.utcnow()
+        now_as_string = now.strftime("%m/%d/%Y %H:%M:%S")
+        footer_text = "as of {} UTC".format(now_as_string)
+        embed.set_footer(text=footer_text)
+        
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def cancelorder(self, ctx:commands.Context, buy_or_sell: str, orderID: int):
+        """Cancel a pending buy or sell order"""
+        if buy_or_sell.lower() in ["buy", "b"]:
+            account = ctx.author
+            if(isinstance(account,User)):
+                await ctx.send(CMD_NO_GUILD)
+                return
+             # Get Economy Account
+            econaccount = EconomyAccount.get_economy_account(account,self.bot.db_session,False)
+            if(econaccount == None):
+                await ctx.send(CMD_ACC_MISSING)
+                return
+            status = OrderManager.cancel_buyorder(self.bot.db_session, econaccount, orderID)
+            if status == 0:
+                await ctx.send("🟢 Cancellation successful")
+            else:
+                await ctx.send("🔴 Something went wrong, please try again")
+
+        elif buy_or_sell.lower() in ["sell", "s"]:
+            account = ctx.author
+            if(isinstance(account,User)):
+                await ctx.send(CMD_NO_GUILD)
+                return
+             # Get Economy Account
+            econaccount = EconomyAccount.get_economy_account(account,self.bot.db_session,False)
+            if(econaccount == None):
+                await ctx.send(CMD_ACC_MISSING)
+                return
+            status = OrderManager.cancel_sellorder(self.bot.db_session, econaccount, orderID)
+            if status == 0:
+                await ctx.send("🟢 Cancellation successful")
+            else:
+                await ctx.send("🔴 Something went wrong, please try again")
+
+        else:
+            await ctx.send("Invalid order type, please use one of the following: buy, b, sell, s")
 
 def setup(bot:BotCore):
     bot.add_cog(Market(bot))
