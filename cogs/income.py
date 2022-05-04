@@ -56,44 +56,16 @@ class Income(commands.Cog):
                 await ctx.send(CMD_CLAIMFAILMINUTES.format(minutes))
 
     @commands.command()
-<<<<<<< HEAD
-    @commands.check_any(commands.is_owner(), commands.has_permissions(administrator=True))
-    async def updateincome(self, ctx, target: nextcord.Member=None, newincome: float=None):
-=======
     @commands.check_any(commands.is_owner(), commands.has_permissions(administrator=True)) # type: ignore
     async def updateincome(self, ctx, target: Union[nextcord.Member,nextcord.User,None]=None, newincome: Optional[float]=None):
->>>>>>> 59aacb595dec3b38850a3ea2b40a43901ab28deb
         """(Owner/Admin) Updates a player's income status."""
         if newincome is None:
             await ctx.send("Invalid command usage. Try **s!help updateincome** for help regarding this command.")
         else:
-<<<<<<< HEAD
-            # Check if targeted account exists
-            account_checked = EconomyAccount.get_economy_account(
-                target,
-                self.bot.db_session,
-                False
-            )
-
-            # Update income status of targeted account (if it exists)
-            if account_checked is None:
-                await ctx.send(ACC_DNE.format(target))
-            
-            else:
-                account = EconomyAccount.updateincome(
-                    account_checked,
-                    self.bot.db_session,
-                    newincome
-                )
-    
-                await ctx.send(CMD_SUCCESS_UPDATEINCOME.format(target, newincome))
-
-=======
             # Check if target is Member
             if not isinstance(target, nextcord.Member):
                 await ctx.send(CMD_NO_GUILD)
                 return
->>>>>>> 59aacb595dec3b38850a3ea2b40a43901ab28deb
 
             # Check if targeted account exists
             account_checked = EconomyAccount.get_economy_account(
