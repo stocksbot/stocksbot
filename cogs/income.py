@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 from messages.economy import *
 from messages.income import CMD_CLAIM, CMD_CLAIMFAILHOURS, CMD_CLAIMFAILMINUTES, CMD_INCOME, CMD_SUCCESS_UPDATEINCOME
 from objects.economy.account import EconomyAccount
-from objects.boards.local import LocalLeaderboard
 from bot import BotCore
 
 
@@ -47,13 +46,6 @@ class Income(commands.Cog):
         status = account.dispense_income(self.bot.db_session)
         if(status == 0):
             await ctx.send(CMD_CLAIM.format(ctx.author, account.get_income(), account.get_balance()))
-            # Update the local leaderboard
-            rank = LocalLeaderboard.update_local_leaderboard(target, self.bot.db_session)
-
-            # Inform player of his/her placement on the leaderboard
-            if rank != 0:
-                await ctx.send("🎉 Congratulations! You've earned a spot on the Local Leaderboard. **s!localboard** to know your position.")
-
         else:
             timediff = status - datetime.now()
             hours = timediff.seconds//3600

@@ -16,7 +16,6 @@ from bot import BotCore
 from objects.orders.sell import SellOrder
 from managers.sharesmanager import SharesManager, SharesManagerCodes
 from objects.stocks.stock import Stock
-from objects.boards.local import LocalLeaderboard
 from typing import Optional
 
 class Market(commands.Cog):
@@ -49,18 +48,8 @@ class Market(commands.Cog):
         status = SharesManager.buy_shares(account, symbol, quantity, price, self.bot.db_session)
         if status == SharesManagerCodes.SUCCESS_INSTANT:
             await ctx.send(CMD_INST_BO)
-            # Update the local leaderboard
-            rank = LocalLeaderboard.update_local_leaderboard(
-                member,
-                self.bot.db_session
-            )
         elif status == SharesManagerCodes.SUCCESS_PENDING:
             await ctx.send(CMD_PEND_BO)
-            # Update the local leaderboard
-            rank = LocalLeaderboard.update_local_leaderboard(
-                member,
-                self.bot.db_session
-            )
         elif status == SharesManagerCodes.ERR_BAL_INSF:
             await ctx.send(CMD_NO_BALANCE)
         elif status == SharesManagerCodes.ERR_STOCK_DNE:
@@ -152,18 +141,8 @@ class Market(commands.Cog):
         status = SharesManager.sell_shares(account, symbol, quantity, price, self.bot.db_session)
         if status == SharesManagerCodes.SUCCESS_INSTANT:
             await ctx.send(CMD_INST_SO)
-            # Update the local leaderboard
-            rank = LocalLeaderboard.update_local_leaderboard(
-                member,
-                self.bot.db_session
-            )
         elif status == SharesManagerCodes.SUCCESS_PENDING:
             await ctx.send(CMD_PEND_SO)
-            # Update the local leaderboard
-            rank = LocalLeaderboard.update_local_leaderboard(
-                member,
-                self.bot.db_session
-            )
         elif status == SharesManagerCodes.ERR_BAL_INSF:
             await ctx.send(CMD_NO_SHARES)
         elif status == SharesManagerCodes.ERR_STOCK_DNE:

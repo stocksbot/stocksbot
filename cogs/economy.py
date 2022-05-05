@@ -8,7 +8,6 @@ from bot import BotCore
 
 from messages.economy import *
 from objects.economy.account import EconomyAccount
-from objects.boards.local import LocalLeaderboard
 
 
 class Economy(commands.Cog):
