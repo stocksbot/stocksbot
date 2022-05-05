@@ -18,7 +18,7 @@ class Boards(commands.Cog):
 
 
     @commands.command()
-    async def localboard(self, ctx:commands.Context, target: Union[User, Member, None]=None):
+    async def localboard(self, ctx:commands.Context):
         target = ctx.author
         leaderboard = LocalLeaderboard.get_local_leaderboard(
             target,

@@ -29,7 +29,7 @@ class LocalLeaderboard(Base):
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     def __repr__(self):
-        return "<table id={0.id}, guild={0.guild_id}, top_1={0.top_users[0]}>".format(self)
+        return "<table id={0.id}, guild={0.guild_id}, top_users=[{0.top_users_name}]>".format(self)
 
     @staticmethod
     def get_local_leaderboard(member:Member, session:Session, create_if_not_exists=True) -> Optional[LocalLeaderboard]:
@@ -81,19 +81,19 @@ class LocalLeaderboard(Base):
         LocalLeaderboard.remove_from_board(
             member,
             session,
-            leaderboard)
+        )
 
         rank = LocalLeaderboard.add_to_board(
             member,
             session,
             current_user,
-            leaderboard
         )
         
         return rank
     
     @staticmethod
-    def add_to_board(member:Member, session:Session, current_user, leaderboard):
+    def add_to_board(member:Member, session:Session, current_user):
+        leaderboard = LocalLeaderboard.get_local_leaderboard(member, session)
         user_id = str(member.id)
 
         size = leaderboard.size
@@ -142,7 +142,8 @@ class LocalLeaderboard(Base):
         return 0
 
     @staticmethod
-    def remove_from_board(member:Member, session:Session, leaderboard):
+    def remove_from_board(member:Member, session:Session):
+        leaderboard = LocalLeaderboard.get_local_leaderboard(member, session)
         user_id = str(member.id)
 
         size = leaderboard.size

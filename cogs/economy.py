@@ -8,6 +8,7 @@ from bot import BotCore
 
 from messages.economy import *
 from objects.economy.account import EconomyAccount
+from objects.boards.local import LocalLeaderboard
 
 
 class Economy(commands.Cog):
@@ -96,6 +97,13 @@ class Economy(commands.Cog):
             await ctx.send("Account is not registered or does not exist.")
         
         else:
+            # Remove from leaderboard (if player is on leaderboard)
+            LocalLeaderboard.remove_from_board(
+                target,
+                self.bot.db_session
+            )
+
+            # Remove from economy account table
             account_deleted = EconomyAccount.delete_economy_account(
                 target,
                 self.bot.db_session
