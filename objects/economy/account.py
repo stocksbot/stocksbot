@@ -110,6 +110,14 @@ class EconomyAccount(Base):
 
         return accounts
 
+    @staticmethod
+    def get_all_accounts(session:Session):
+
+        # Search for accounts in guild
+        accounts = session.query(EconomyAccount)
+
+        return accounts
+
     def has_balance(self, amount, raw=False):
         if not raw:
             amount *= 10000
