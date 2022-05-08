@@ -11,6 +11,7 @@ from objects.stocks.shares import Shares
 from objects.stocks.stock import Stock
 
 from table2ascii import table2ascii as t2a, PresetStyle
+from table2ascii import Alignment
 
 
 class Boards(commands.Cog):
@@ -21,11 +22,13 @@ class Boards(commands.Cog):
     @commands.command()
     async def localboard(self, ctx:commands.Context, size=10):
         """Shows the Local Leaderboard. If size of board is not specified, the bot returns a leaderboard of size 10 by default.
-        To avoid spamming, the maximum size of board is limited to 40."""
+        To avoid spamming, the maximum size of board is limited to 20."""
         target = ctx.author
 
-        # avoid spamming the discord channel from someone requesting a gigantic leaderboard (limit size to 40)
-        size = min(size, 40)
+        # avoid spamming the discord channel from someone requesting a gigantic leaderboard (limit size to 20)
+        if size > 20:
+            await ctx.send("To avoid spamming, leaderboard size is limited to 20.")
+            size = 20
 
         # Get the list of users in the guild and sort by balance
         users = EconomyAccount.get_guild_accounts(
@@ -98,7 +101,8 @@ class Boards(commands.Cog):
         table = t2a(
             header = ["Rank", "Username", "Tag", "Net Worth"],
             body = output,
-            style=PresetStyle.thin_compact
+            style=PresetStyle.thin_compact,
+            alignments=[Alignment.LEFT, Alignment.CENTER, Alignment.CENTER, Alignment.RIGHT]
             )
         
         await ctx.send(f"```\n{table}\n```")
@@ -106,6 +110,15 @@ class Boards(commands.Cog):
 
     @commands.command()
     async def globalboard(self, ctx: commands.Context, size=10):
+        """Shows the Global Leaderboard. If size of board is not specified, the bot returns a leaderboard of size 10 by default.
+        To avoid spamming, the maximum size of board is limited to 20."""
+        target = ctx.author
+
+        # avoid spamming the discord channel from someone requesting a gigantic leaderboard (limit size to 20)
+        if size > 20:
+            await ctx.send("To avoid spamming, leaderboard size is limited to 20.")
+            size = 20
+    
         # Get all accounts
         users = EconomyAccount.get_all_accounts(
             self.bot.db_session
@@ -177,7 +190,8 @@ class Boards(commands.Cog):
         table = t2a(
             header = ["Rank", "Username", "Tag", "Guild", "Net Worth"],
             body = output,
-            style=PresetStyle.thin_compact
+            style=PresetStyle.thin_compact,
+            alignments=[Alignment.LEFT, Alignment.CENTER, Alignment.CENTER, Alignment.CENTER, Alignment.RIGHT]
             )
         
         await ctx.send(f"```\n{table}\n```")
