@@ -3,11 +3,12 @@ from binascii import Incomplete
 
 from datetime import datetime, timedelta
 import logging
+from tokenize import String
 import nextcord
 from nextcord import Member
 from typing import Optional, Union
 
-from sqlalchemy import Column, Boolean, Float, Integer, BigInteger, DateTime, UniqueConstraint, and_
+from sqlalchemy import Column, Boolean, Float, Integer, BigInteger, DateTime, UniqueConstraint, String, and_
 from sqlalchemy.orm import Session
 
 from objects.base import Base
@@ -19,6 +20,9 @@ class EconomyAccount(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(BigInteger)            # Discord user id
     guild_id = Column(BigInteger)           # Discord server id
+    guild_name = Column(String)             # Discord server name
+    name = Column(String)                   # Discord username
+    tag = Column(Integer)                   # Discord tag
     balance = Column(BigInteger)
     income = Column(BigInteger)
     enabled = Column(Boolean)
@@ -57,11 +61,17 @@ class EconomyAccount(Base):
         # Get member's details
         user_id = member.id
         guild_id = member.guild.id
+        guild_name = member.guild.name
+        name = member.name
+        tag = member.discriminator
 
         # Initialize new account
         new_account = EconomyAccount(
             user_id = user_id,
             guild_id = guild_id,
+            guild_name = guild_name,
+            name = name,
+            tag = tag,
             balance = 100000,
             income = 20000,
             enabled = enabled,
@@ -89,6 +99,24 @@ class EconomyAccount(Base):
         ).delete()
 
         return result
+
+    @staticmethod
+    def get_guild_accounts(self, session:Session, guild_id):
+
+        # Search for accounts in guild
+        accounts = session.query(EconomyAccount).filter(
+            EconomyAccount.guild_id == guild_id,
+        )
+
+        return accounts
+
+    @staticmethod
+    def get_all_accounts(session:Session):
+
+        # Search for accounts in guild
+        accounts = session.query(EconomyAccount)
+
+        return accounts
 
     def has_balance(self, amount, raw=False):
         if not raw:
