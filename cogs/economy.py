@@ -41,7 +41,7 @@ class Economy(commands.Cog):
         await ctx.send(CMD_BAL.format(target, account.get_balance()))
 
     @commands.command()
-    @commands.is_owner()
+    @commands.has_permissions(administrator=True)
     async def registerall(self, ctx:commands.Context):
         """(Owner) Gives all users in guild economy accounts."""
         registered = 0
@@ -75,7 +75,7 @@ class Economy(commands.Cog):
         logging.info("Registered {0} new accounts in the Economy database.".format(registered))
     
     @commands.command()
-    @commands.is_owner()
+    @commands.has_permissions(administrator=True)
     async def removeplayer(self, ctx, target: nextcord.Member):
         """Removes a player from the game.
         Note: Removing a player deletes the player's account data including all of his assets. Proceed with caution.
