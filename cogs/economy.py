@@ -15,7 +15,7 @@ class Economy(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def bal(self, ctx:commands.Context, target: Union[User, Member, None]=None):
+    async def bal(self, ctx:commands.Context, target: Union[Member, User, None]=None):
         """Shows target account's balance. If target account is not yet registered, applying this command will automatically register the account.
         If target account is not specified, the bot shows your balance instead.
         """
